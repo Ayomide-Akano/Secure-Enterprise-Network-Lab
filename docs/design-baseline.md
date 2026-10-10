@@ -75,11 +75,11 @@ WAN links are separate: HQ 203.0.113.0/30 uses .1 and .2; branch 198.51.100.0/30
 
 ## Trunk and cabling rules
 
-- HQ core-to-core LACP EtherChannel: allow VLANs 10, 20, 30, 40, 50, and 99; native VLAN 999.
-- HQ core-to-access trunks: allow VLANs 10, 20, 30, 40, 50, and 99; native VLAN 999.
+- HQ core-to-core LACP EtherChannel: allow VLANs 10, 20, 30, 40, 50, 99, and 999; native VLAN 999.
+- HQ core-to-access trunks: allow VLANs 10, 20, 30, 40, 50, 99, and 999; native VLAN 999.
 - The HQ firewall inside interface uses a routed /30 link to CORE-SW1, not an access port in a fabricated transit VLAN.
 - DMZ-SW1 connects to HQ-FW1 on an access port in VLAN 60. A separate management-only access link/port connects DMZ-SW1 to HQ management VLAN 99. VLAN 60 must not traverse that management uplink.
-- Branch router-to-switch trunk: allow VLANs 10 and 99; native VLAN 999.
+- Branch router-to-switch trunk: allow VLANs 10, 99, and 999; native VLAN 999.
 - VLAN 999 is not assigned an IP address or SVI. Shut down unused ports and park them in VLAN 999.
 
 Port numbers are planned labels and must be checked against the chosen Packet Tracer models before cabling. If a model uses different interfaces, update the port map and diagram together.

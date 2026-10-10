@@ -1,94 +1,63 @@
-# Repository Audit — Initial Findings
+# Repository Audit and Consistency Remediation
 
-**Repository:** `Ayomide-Akano/Secure-Enterprise-Network-Lab`  
-**Baseline branch:** `main`  
-**Audit branch:** `audit/architecture-and-repository-baseline`  
-**Audit scope:** Repository tree, README, design documentation, addressing plan, security-control outline, test-status document, Draw.io source, and Packet Tracer artifact contents.
+**Repository:** Ayomide-Akano/Secure-Enterprise-Network-Lab  
+**Baseline branch:** main  
+**Working branch:** audit/architecture-and-repository-baseline  
+**Scope:** Tracked repository tree, design/addressing/security/testing documents, diagram source and preview, configuration placeholders, and Packet Tracer artifact contents.
 
-## Executive summary
+## Initial findings
 
-The repository has a useful starting structure, but it is **not yet a complete or internally consistent implementation** of the documented enterprise network. The most important problems are contradictory addressing and VLAN assignments, empty device-configuration directories, an invalid Packet Tracer deliverable (the current `.pkt` file is plain Markdown placeholder text encoded as Base64, not a Packet Tracer project), and test documentation that describes checks as planned rather than completed.
+The initial review found contradictory gateway/core SVI assignments, conflicting firewall transit addressing, branch gateway and SVI conflicts, inconsistent DMZ subnet/host addresses, VLAN 99 versus 999 native VLAN disagreement, endpoint VLAN labels inconsistent with endpoint roles, a Draw.io layout with negative coordinates, configuration folders containing explanatory placeholder text rather than configurations, a test document containing plans but no observed evidence, and a 206-byte .pkt path containing Markdown placeholder text rather than a Packet Tracer project.
 
-No project files were deleted during this initial pass. This report is committed on an audit branch so findings can be addressed without replacing the existing `main` branch baseline.
+## Reconciliation decisions
 
-## Findings
+A canonical design baseline was added at docs/design-baseline.md. The following decisions now govern the other design artifacts:
 
-### Critical — Packet Tracer artifact is a placeholder
+- HQ VLANs: 10 management, 20 users, 30 servers, 40 guest, 50 DMZ; VLAN 901 is firewall transit.
+- HQ HSRP virtual gateways use .1; CORE-SW1 SVI addresses use .2; CORE-SW2 use .3.
+- HQ-FW1 inside is 10.10.1.254/24 in transit VLAN 901; core transit addresses are 10.10.1.2 and .3 with HSRP VIP 10.10.1.1.
+- HQ-FW1 owns the DMZ gateway 10.10.50.1; DMZ-SW1 is 10.10.50.2; WEB-SRV1 is 10.10.50.20. No HQ core SVI exists for VLAN 50.
+- Branch uses router-on-a-stick. BR-RTR1 subinterfaces are gateways for VLANs 110–140; BR-SW1 has only management SVI 10.20.10.2 in VLAN 110.
+- The HQ and branch ISP links use separate /30s: 203.0.113.0/30 and 203.0.113.4/30.
+- VLAN 999 is native/unused with no SVI/IP; VLAN 998 is the unused-port parking VLAN with no SVI/IP.
+- PC-STAFF1 and PC-FIN1 are VLAN 20, PC-ADMIN1 VLAN 10, PC-GUEST1 VLAN 40. There is no separate Finance VLAN.
+- The planned IPsec peers are HQ-FW1 outside and BR-RTR1 WAN.
+- The single firewall-to-CORE-SW1 link is explicitly documented as a single point of failure.
 
-- Path: `packet-tracer/enterprise-network.pkt`
-- The file is only 206 bytes and decodes to a Markdown note saying the folder is reserved and instructing someone to add a `.pkt` file.
-- It is **not** a valid Packet Tracer topology and should not be represented as a completed lab.
-- Remediation: replace it with a real Packet Tracer file exported from Cisco Packet Tracer, and validate that it opens. Until then, keep the placeholder content in a clearly named `README.md` and do not claim simulation validation.
+## Changes made on the working branch
 
-### High — Device configuration directories contain no device configurations
+- Added docs/design-baseline.md as the single source of truth.
+- Rewrote docs/ip-addressing.md to match the canonical gateways, subnets, VLANs, interface roles, and WAN links.
+- Rewrote docs/network-design.md with a consistent device inventory, endpoint VLAN assignments, port map, topology, routing intent, limitations, and build order.
+- Rewrote docs/security-controls.md as a zone/policy matrix tied to test IDs.
+- Rewrote testing/test-results.md as a static-design, connectivity, security, and redundancy test matrix; tests remain Not run until executed.
+- Replaced the Draw.io source with a fresh, on-canvas topology based on the canonical baseline.
+- Rewrote README.md to distinguish design from implementation.
+- Replaced explanatory .gitkeep placeholders with directory READMEs.
+- Removed the fake .pkt placeholder and stale PNG preview rather than leave misleading artifacts. The Packet Tracer README now states that a real simulation file and fresh export must be added after the lab is built.
 
-- Paths: `configs/hq/` and `configs/branch/`
-- Each contains only a `.gitkeep` file whose content is explanatory Markdown. No IOS/firewall configuration examples are present.
-- Remediation: add versioned, device-specific configuration files only after the addressing and topology baseline is reconciled. Rename or replace the current `.gitkeep` placeholders with actual `README.md` files if explanatory content is retained.
+## Still pending by design
 
-### High — Addressing plan and network design disagree
-
-1. **Gateway/core SVI allocation:** `docs/ip-addressing.md` reserves `.1` for HSRP, `.2` for CORE-SW1, and `.3` for CORE-SW2. `docs/network-design.md` instead assigns `.1` to CORE-SW1 and `.2` to CORE-SW2, with no HSRP virtual address shown in those interface rows.
-2. **HQ firewall inside interface:** the addressing plan lists `10.10.1.254/24`; the network-design table lists `10.10.1.1/24`. The separate point-to-point section says `10.10.0.0/30`, with `10.10.0.1` and `10.10.0.2`, which conflicts with the `10.10.1.0/24` inside-link design.
-3. **Branch user gateway:** the addressing plan uses `10.20.20.1/24`; the network-design interface table instead lists `10.20.1.1/24`.
-4. **Branch switch SVI addresses:** the addressing plan uses `.2` for BR-SW1 in VLANs 110–140; the network-design table uses `.1`, overlapping the documented gateway convention.
-5. **DMZ subnet:** the addressing plan uses `10.10.50.0/24`; the embedded Mermaid topology labels the DMZ `172.16.60.0/24`.
-6. **DMZ host assignments:** the addressing plan lists DMZ-SW1 as `10.10.50.10` and WEB-SRV1 as `10.10.50.20`; the network-design table lists DMZ-SW1 as `10.10.50.2` and WEB-SRV1 as `10.10.50.10`.
-7. **Native/unused VLAN:** the addressing plan uses VLAN 99 as the native VLAN; the network-design VLAN table calls VLAN 999 the native/unused VLAN.
-8. **Endpoint VLAN labels:** the Mermaid diagram places PC-STAFF1 in VLAN 10 and PC-ADMIN1 in VLAN 30, although VLAN 10 is documented as management and VLAN 30 as servers. Those labels should be reconciled with the intended endpoint roles.
-
-These are not cosmetic differences; they can cause duplicate IP assignments, wrong default gateways, and misleading implementation instructions.
-
-### High — Diagram needs layout and content validation
-
-- Source: `diagrams/hq-branch-topology.drawio`
-- Preview: `diagrams/hq-branch-topology.drawio.png`
-- The source contains negative canvas coordinates for the branch devices and title, which can place elements off-canvas or crop them in exports.
-- The diagram includes the conflicting DMZ subnet label noted above and needs to be checked against the final approved interface/IP table.
-- The source uses built-in Draw.io library image references. Confirm icons render consistently in the editor and exported PNG.
-- Remediation: after the addressing baseline is approved, align all labels, links, interfaces, zones, VLANs and subnets, then regenerate the PNG from the corrected source.
-
-### Medium — Security-control document is guidance, not evidence of implementation
-
-- Path: `docs/security-controls.md`
-- It lists recommended controls and baseline policy intentions, but does not include actual device configurations, explicit source/destination/service matrices, or validation evidence.
-- Remediation: add a security policy matrix and map each policy to a device/interface/ACL or firewall rule, then reference the corresponding test case.
-
-### Medium — Test results are planning notes, not test evidence
-
-- Path: `testing/test-results.md`
-- It explicitly says the lab is being prepared and validated, and lists IP overlap, routing, firewall, WAN, and segmentation checks as planned.
-- No commands, expected results, observed results, timestamps, pass/fail status, or Packet Tracer evidence are recorded.
-- Remediation: maintain a test matrix with ID, objective, setup, command/action, expected result, observed result, status, and evidence path. Do not mark a test passed until it has been executed.
-
-### Low — Repository placeholders and documentation need cleanup
-
-- The current `.gitkeep` files contain prose and should be renamed to `README.md` if they are meant to document their directories.
-- README wording currently describes configurations and Packet Tracer assets as though those directories are populated, even though the configuration directories are placeholders and the `.pkt` file is not a real Packet Tracer project.
-- The repository has no clear top-level implementation status matrix distinguishing **designed**, **configured**, **simulated**, and **verified**.
-
-## Recommended remediation order
-
-1. Approve one canonical addressing and VLAN plan. Resolve every conflict listed above before writing device configurations.
-2. Update `docs/ip-addressing.md`, `docs/network-design.md`, and the Draw.io source from that single baseline.
-3. Regenerate the PNG and check that all topology elements and labels are visible and consistent.
-4. Add real HQ and branch configuration examples matching the approved device models and Packet Tracer capabilities.
-5. Build and commit a real `.pkt` lab file; open it in Packet Tracer and capture proof of the topology and key configurations.
-6. Execute baseline tests and record observed evidence, including negative tests for prohibited access and failover tests where implemented.
-7. Update the README and status matrix to reflect only what exists and has actually been verified.
+- Confirm selected Packet Tracer device models and actual port names; current port labels are planned and must be checked against the models before cabling.
+- Open the Draw.io source and visually review its layout.
+- Build and save the actual Packet Tracer .pkt file.
+- Add device configuration files only after confirming device models and the design baseline.
+- Execute tests and record actual results/evidence.
+- Review whether the single firewall-to-core link should be redesigned if end-to-end redundancy is a requirement.
 
 ## Verification limits
 
-This first audit inspected the repository's tracked paths and fetched text-based artifacts. The GitHub connector cannot interpret a Packet Tracer binary simulation, and the repository's current `.pkt` file is only placeholder text. Device behavior, Packet Tracer compatibility, HSRP/STP/EtherChannel behavior, VPN operation, firewall enforcement, and failover therefore remain unverified until a real lab is built and tested.
+Text files and diagram source were reviewed and reconciled. The topology has not been built in Packet Tracer, so the design has not been simulation-validated. No VPN, ACL, NAT, HSRP, EtherChannel, STP, AAA, or failover behavior is claimed as tested. The diagram source has been replaced but must be opened in diagrams.net for visual review. A PNG preview is intentionally absent until it can be regenerated from the corrected source.
 
-## Initial status
+## Status
 
 | Area | Status | Reason |
 |---|---|---|
-| Repository structure | Reviewed | Initial tracked tree inspected |
-| Addressing consistency | **Fail** | Multiple conflicting IP/gateway/subnet assignments |
-| Device configurations | **Missing** | HQ/branch config directories contain placeholders only |
-| Draw.io source | Needs correction | Off-canvas coordinates and inconsistent subnet labels |
-| Packet Tracer project | **Missing/invalid** | Current `.pkt` path contains Markdown placeholder text |
-| Security implementation | Not verified | Recommendations exist; no device configs/evidence |
-| Test evidence | Not executed/documented | Current test file contains planned checks only |
+| Canonical design baseline | Written | One declared source of truth |
+| IP/VLAN consistency | Reconciled in documents | Requires final cross-file check |
+| Cable/port map | Documented | Port labels require selected-model confirmation |
+| Security policy | Documented | Configuration and tests pending |
+| Draw.io source | Replaced | Visual review pending |
+| Packet Tracer file | Not present yet | User has not built the simulation yet |
+| Device configs | Pending | Must follow chosen Packet Tracer models |
+| Tests | Not run | Simulation not yet built |

@@ -1,9 +1,0 @@
-# Branch Configuration
-
-This folder contains configuration examples for Branch network devices.
-
-Recommended files:
-- `branch-router.txt`
-- `branch-switch.txt`
-- `branch-firewall.txt`
-- `branch-vlan-plan.txt`

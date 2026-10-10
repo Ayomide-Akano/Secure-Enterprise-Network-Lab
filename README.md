@@ -2,7 +2,7 @@
 
 A Cisco Packet Tracer enterprise-network design project. The goal is a consistent, documented architecture before the lab is built.
 
-**Current state:** The core design documents have been reconciled on the audit branch; final cross-file checks and visual review remain. The Packet Tracer simulation has not yet been built. No connectivity, security, VPN, or failover tests are claimed as passed.
+**Current state:** The core design documents have been reconciled and static cross-file checks completed on the audit branch; visual review and device-model validation remain. The Packet Tracer simulation has not yet been built. No connectivity, security, VPN, or failover tests are claimed as passed.
 
 ## Source of truth
 

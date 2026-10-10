@@ -18,26 +18,67 @@ Design a secure enterprise network connecting a Headquarters (HQ) and a Branch o
 4. Ensure redundancy where possible.
 5. Centralize logging and monitoring.
 
-## Proposed Segments
+## Device Inventory
 
-### HQ
-- Management VLAN
-- User VLAN
-- Server VLAN
-- Guest VLAN
-- DMZ / external services
+| Device Name | Role | Location | Notes |
+|-------------|------|----------|-------|
+| HQ-CORE-SW1 | Core switch | HQ | Primary aggregation and distribution layer |
+| HQ-CORE-SW2 | Core switch | HQ | Redundant core switch for resilience |
+| HQ-ACC-SW1 | Access switch | HQ | User access layer |
+| HQ-ACC-SW2 | Access switch | HQ | Secondary access layer |
+| HQ-FW1 | Firewall | HQ | Internet edge and policy enforcement |
+| DMZ-SW1 | DMZ switch | HQ | Public-facing services |
+| ISP-RTR | Internet edge router | ISP | WAN/Internet provider connection |
+| BR-RTR1 | Branch router | Branch | Site-to-site WAN termination |
+| BR-SW1 | Branch access switch | Branch | Branch endpoint aggregation |
+| WEB-SRV1 | Web server | DMZ | Public-facing server |
+| AAA-SRV1 | AAA server | HQ | Authentication and accounting services |
+| BR-PC1 | Branch endpoint | Branch | End-user workstation |
+| USER-PCs | End-user hosts | HQ / Branch | Standard office endpoints |
 
-### Branch
-- Branch user VLAN
-- Branch management VLAN
-- Local server or guest resources
+## VLAN Mapping
 
-## Connectivity
+| VLAN ID | Name | Subnet | Gateway | Purpose |
+|--------|------|--------|---------|---------|
+| 10 | HQ-MGMT | 10.10.10.0/24 | 10.10.10.1 | Management and infrastructure |
+| 20 | HQ-USERS | 10.10.20.0/24 | 10.10.20.1 | Office users |
+| 30 | HQ-SERVERS | 10.10.30.0/24 | 10.10.30.1 | Internal server resources |
+| 40 | HQ-GUEST | 10.10.40.0/24 | 10.10.40.1 | Guest access |
+| 50 | HQ-DMZ | 10.10.50.0/24 | 10.10.50.1 | Public-facing DMZ services |
+| 110 | BR-MGMT | 10.20.10.0/24 | 10.20.10.1 | Branch management |
+| 120 | BR-USERS | 10.20.20.0/24 | 10.20.20.1 | Branch user LAN |
+| 130 | BR-SERVICES | 10.20.30.0/24 | 10.20.30.1 | Branch local services |
+| 140 | BR-GUEST | 10.20.40.0/24 | 10.20.40.1 | Guest access |
+| 999 | NATIVE/UNUSED | - | - | Reserved for future use or lab expansion |
 
-- HQ Internet edge and firewall
-- Branch router/firewall connecting to HQ over WAN
-- Internal routing with OSPF or static routes depending on scale
-- Optional VPN tunnels for secure inter-site connectivity
+## IP Allocation per Interface
+
+| Device | Interface | IP Address | Mask | Description |
+|--------|-----------|-----------|------|-------------|
+| ISP-RTR | Gi0/0 | 203.0.113.1 | /30 | Provider-facing internet side |
+| ISP-RTR | Gi0/1 | 172.16.10.1 | /30 | WAN side to branch router |
+| HQ-FW1 | Outside | 203.0.113.2 | /30 | Internet-facing firewall interface |
+| HQ-FW1 | Inside | 10.10.1.1 | /24 | Core connectivity to HQ internal network |
+| HQ-FW1 | DMZ | 10.10.50.1 | /24 | DMZ firewall interface |
+| HQ-CORE-SW1 | VLAN 10 | 10.10.10.1 | /24 | Management SVI |
+| HQ-CORE-SW1 | VLAN 20 | 10.10.20.1 | /24 | Users SVI |
+| HQ-CORE-SW1 | VLAN 30 | 10.10.30.1 | /24 | Servers SVI |
+| HQ-CORE-SW1 | VLAN 40 | 10.10.40.1 | /24 | Guest SVI |
+| HQ-CORE-SW1 | Link to HQ-FW1 | 10.10.1.2 | /24 | Core-to-firewall inside link |
+| HQ-CORE-SW2 | VLAN 10 | 10.10.10.2 | /24 | Redundant management SVI |
+| HQ-CORE-SW2 | VLAN 20 | 10.10.20.2 | /24 | Redundant users SVI |
+| HQ-CORE-SW2 | VLAN 30 | 10.10.30.2 | /24 | Redundant servers SVI |
+| HQ-CORE-SW2 | VLAN 40 | 10.10.40.2 | /24 | Redundant guest SVI |
+| DMZ-SW1 | VLAN 50 | 10.10.50.2 | /24 | DMZ switch management/IP |
+| WEB-SRV1 | NIC | 10.10.50.10 | /24 | Public web server |
+| AAA-SRV1 | NIC | 10.10.30.10 | /24 | AAA and directory service |
+| BR-RTR1 | WAN | 172.16.10.2 | /30 | Branch WAN link |
+| BR-RTR1 | LAN | 10.20.1.1 | /24 | Branch LAN gateway |
+| BR-SW1 | VLAN 110 | 10.20.10.1 | /24 | Branch management SVI |
+| BR-SW1 | VLAN 120 | 10.20.20.1 | /24 | Branch user SVI |
+| BR-SW1 | VLAN 130 | 10.20.30.1 | /24 | Branch services SVI |
+| BR-SW1 | VLAN 140 | 10.20.40.1 | /24 | Branch guest SVI |
+| BR-PC1 | NIC | 10.20.20.10 | /24 | Branch user workstation |
 
 ## Physical Cable Map
 
@@ -54,6 +95,43 @@ Design a secure enterprise network connecting a Headquarters (HQ) and a Branch o
 | 9 | ISP-RTR | BR-RTR1 | Copper straight | Branch WAN |
 | 10 | BR-RTR1 | BR-SW1 | Copper straight | Branch LAN |
 | 11 | Endpoints | Their switches | Copper straight | PCs on access, WEB-SRV1 on DMZ-SW1, AAA-SRV1 on HQ-CORE-SW2, BR-PC1 on BR-SW1 |
+
+## Logical Topology (Mermaid)
+
+```mermaid
+flowchart LR
+    Internet[Internet] --> ISP[ISP-RTR]
+    ISP --> FW[HQ-FW1]
+    FW --> CORE[HQ-CORE-SW1]
+    CORE --> ACC1[HQ-ACC-SW1]
+    CORE --> ACC2[HQ-ACC-SW2]
+    CORE --> AAA[AAA-SRV1]
+    FW --> DMZ[DMZ-SW1]
+    DMZ --> WEB[WEB-SRV1]
+
+    CORE --> USER1[USER-PCs]
+    ACC1 --> USER2[USER-PCs]
+    ACC2 --> USER3[USER-PCs]
+
+    ISP --> BRRTR[BR-RTR1]
+    BRRTR --> BRSW[BR-SW1]
+    BRSW --> BRPC[BR-PC1]
+```
+
+## Suggested Cisco Device Names and Roles
+
+- HQ-CORE-SW1: primary distribution/core switch for HQ LAN
+- HQ-CORE-SW2: redundant core switch for HA and resilience
+- HQ-ACC-SW1: access switch for HQ user VLANs
+- HQ-ACC-SW2: backup access switch for high availability
+- HQ-FW1: Cisco firewall or security appliance for segmentation and Internet edge
+- DMZ-SW1: DMZ switch for public services
+- ISP-RTR: upstream provider router
+- BR-RTR1: branch WAN router and default gateway
+- BR-SW1: branch access distribution switch
+- WEB-SRV1: DMZ web server
+- AAA-SRV1: authentication, authorization, and accounting server
+- BR-PC1: example branch user workstation
 
 ## Security Controls
 

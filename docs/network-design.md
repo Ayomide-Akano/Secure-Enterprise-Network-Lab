@@ -96,6 +96,27 @@ Design a secure enterprise network connecting a Headquarters (HQ) and a Branch o
 | 10 | BR-RTR1 | BR-SW1 | Copper straight | Branch LAN |
 | 11 | Endpoints | Their switches | Copper straight | PCs on access, WEB-SRV1 on DMZ-SW1, AAA-SRV1 on HQ-CORE-SW2, BR-PC1 on BR-SW1 |
 
+## Port Record Table
+
+| Link | Device A | Port A | Device B | Port B |
+|------|----------|--------|----------|--------|
+| 1 | HQ-CORE-SW1 | Gi1/0/23 | HQ-CORE-SW2 | Gi1/0/23 |
+| 2 | HQ-CORE-SW1 | Gi1/0/24 | HQ-CORE-SW2 | Gi1/0/24 |
+| 3 | HQ-CORE-SW1 | Gi1/0/1 | HQ-ACC-SW1 | Gi1/0/1 |
+| 4 | HQ-CORE-SW1 | Gi1/0/2 | HQ-ACC-SW2 | Gi1/0/1 |
+| 5 | HQ-CORE-SW2 | Gi1/0/1 | HQ-ACC-SW1 | Gi1/0/2 |
+| 6 | HQ-CORE-SW2 | Gi1/0/2 | HQ-ACC-SW2 | Gi1/0/2 |
+| 7 | HQ-CORE-SW1 | Gi1/0/10 | HQ-FW1 | inside |
+| 8 | HQ-FW1 | outside | ISP-RTR | Gi0/0 |
+| 9 | HQ-FW1 | DMZ | DMZ-SW1 | Gi1/0/1 |
+| 10 | ISP-RTR | Gi0/1 | BR-RTR1 | Gi0/0 |
+| 11 | BR-RTR1 | Gi0/1 | BR-SW1 | Gi1/0/1 |
+| 12 | BR-SW1 | Gi1/0/2 | BR-PC1 | NIC |
+| 13 | HQ-ACC-SW1 | access port | PC-STAFF1 | NIC |
+| 14 | HQ-ACC-SW2 | access port | PC-ADMIN1 | NIC |
+| 15 | HQ-CORE-SW2 | access port | AAA-SRV1 | NIC |
+| 16 | DMZ-SW1 | access port | WEB-SRV1 | NIC |
+
 ## Logical Topology (Mermaid)
 
 ```mermaid

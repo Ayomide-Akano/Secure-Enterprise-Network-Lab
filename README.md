@@ -1,80 +1,70 @@
-# Secure-Enterprise-Network-Lab
+# Secure Enterprise Network Lab — HQ + Branch
 
-Secure Enterprise Network (HQ + Branch) - A networking lab and documentation repository for a secure enterprise architecture spanning a headquarters site and a branch office.
+A Cisco Packet Tracer-oriented enterprise network design project focused on segmented HQ and branch connectivity, routing, perimeter security, and repeatable validation.
 
-## Overview
+> **Current state:** Design documentation exists, but the repository audit has identified conflicting addressing decisions, missing device configurations, and a placeholder rather than a valid Packet Tracer project. The network must not be described as implemented or validated yet.
 
-This repository is designed to model and document a realistic enterprise network environment with:
+## Project objectives
 
-- Headquarters (HQ) core services and security controls
-- Branch office connectivity and local user access
-- Segmented VLAN design and secure inter-site communication
-- IP addressing and routing strategy
-- Firewall, access control, and security hardening guidance
-- Packet Tracer lab structure for practical validation
+- Design a segmented HQ and branch network.
+- Document VLANs, subnets, gateways, routed links, device roles, and physical connectivity.
+- Define least-privilege security boundaries between users, management, servers, guests, and DMZ services.
+- Build matching device configurations and a real Packet Tracer topology.
+- Validate reachability, prohibited traffic, redundancy, and security controls with recorded evidence.
 
-## Project Goals
+## Repository layout
 
-- Design a secure and scalable enterprise network
-- Separate user, management, server, and guest traffic
-- Enforce least-privilege policies and segmentation
-- Document HQ and branch site connectivity
-- Provide a foundation for Packet Tracer and networking lab exercises
+| Path | Purpose | Current status |
+|---|---|---|
+| `docs/network-design.md` | Architecture, inventory, VLANs, physical/logical topology | Draft; addressing conflicts need resolution |
+| `docs/ip-addressing.md` | IP plan and interface assignments | Draft; conflicts need resolution |
+| `docs/security-controls.md` | Security objectives and recommended controls | Guidance only; not implementation evidence |
+| `docs/repository-audit.md` | Findings and remediation order from the repository review | Initial audit available |
+| `diagrams/hq-branch-topology.drawio` | Editable Draw.io topology | Needs alignment with the canonical plan |
+| `diagrams/hq-branch-topology.drawio.png` | Exported topology preview | Needs regeneration after diagram correction |
+| `configs/hq/` | HQ device configurations | Not yet populated with configurations |
+| `configs/branch/` | Branch device configurations | Not yet populated with configurations |
+| `packet-tracer/` | Cisco Packet Tracer project | A real `.pkt` file is still required |
+| `testing/test-results.md` | Test plan and results | Planned checks only; no completed evidence recorded |
 
-## Repository Structure
+## Intended architecture
 
-- `docs/` – design documentation, addressing plan, and security controls
-- `diagrams/` – architecture diagrams and exported visuals
-- `configs/` – device configuration examples for HQ and branch locations
-- `packet-tracer/` – Packet Tracer project assets
-- `testing/` – validation and test results documentation
+The documented target includes a headquarters site and a branch site, HQ core and access switching, a perimeter firewall, an ISP edge, a DMZ web service, an AAA service, and a branch router/access switch. The design proposes VLAN segmentation, controlled inter-VLAN access, secure device management, centralized logging, and a site-to-site VPN.
 
-## High-Level Architecture
+These are **design intentions**, not proof that the controls are configured or operational.
 
-- HQ: central internet edge, firewall, routing, switching, and core services
-- Branch: remote site with local users, segmentation, and secure WAN connectivity
-- WAN: site-to-site connectivity between HQ and branch
-- Security boundary: firewall policies, ACLs, segmentation, logging, and hardening
+## Important implementation status
 
-## Documentation
+| Stage | Status |
+|---|---|
+| Initial repository and documentation review | In progress |
+| Canonical addressing/VLAN plan | Blocked by conflicting assignments |
+| Reconciled topology diagram | Pending |
+| HQ and branch device configurations | Pending |
+| Valid Packet Tracer simulation file | Pending |
+| Connectivity and routing tests | Pending |
+| Security negative tests and segmentation validation | Pending |
+| Redundancy/failover tests | Pending |
+| Evidence-backed final documentation | Pending |
 
-The `docs/` folder includes:
+## Audit and next steps
 
-- `network-design.md` – enterprise network architecture and connectivity model
-- `ip-addressing.md` – IP addressing plan for HQ, branch, and WAN
-- `security-controls.md` – firewall, segmentation, access control, and device hardening guidance
+Read [the initial repository audit](docs/repository-audit.md). The next priority is to approve one consistent IP/VLAN/interface plan before producing device configurations. This avoids embedding contradictory gateway and subnet assignments in the lab.
 
-## Configurations
+Testing must record the action or command, expected result, observed result, pass/fail outcome, and evidence. A planned control must not be marked as passed until it has been tested.
 
-The `configs/` folder is intended to hold example device configurations for:
+## Lab assumptions and safety
 
-- HQ core switch
-- HQ router
-- HQ firewall
-- Branch router
-- Branch switch
-- Branch firewall
+- Documentation-only address ranges (for example, `203.0.113.0/24`) are examples and are not real public allocations for production use.
+- Use unique credentials in the lab; never commit real passwords, shared secrets, VPN keys, or other sensitive credentials.
+- Confirm feature support for the exact Packet Tracer device models before treating a configuration example as executable.
+- This is a learning lab, not a production-ready reference architecture.
 
-## Packet Tracer
+## Contribution workflow
 
-The `packet-tracer/` directory is reserved for the Cisco Packet Tracer lab representation of the secure enterprise topology.
-
-## Testing
-
-The `testing/` directory contains validation notes, test assumptions, and results documentation.
-
-## Typical Use Cases
-
-- Network design coursework
-- Enterprise security lab exercises
-- HQ + branch connectivity design practice
-- Firewall and segmentation validation
-- Packet Tracer simulation scenarios
-
-## Notes
-
-This repository is intended as a practical lab foundation and can be expanded with device configs, diagrams, topologies, and validation reports.
-
-## Status
-
-In progress – baseline architecture and documentation are in place.
+1. Reconcile the addressing and VLAN plan.
+2. Update the design document and editable diagram from the same baseline.
+3. Add device-specific configuration examples.
+4. Build and open the actual Packet Tracer project.
+5. Run tests and record evidence.
+6. Update status claims only after verification.

@@ -1,10 +1,10 @@
-# Branch Device Configurations
+# Branch Device Configuration Handoff
 
-No device configurations have been added yet. Use docs/design-baseline.md as the source of truth and docs/network-design.md for the port map.
+No device configuration files have been created yet. Follow docs/design-baseline.md and docs/network-design.md.
 
-Planned configuration files, to be added after Packet Tracer device models and interface names are confirmed:
-- branch-router.txt — WAN interface, VLAN 110/120/130/140 subinterfaces, routing, ACLs, planned IPsec VPN, secure management.
-- branch-switch.txt — VLANs, router-on-a-stick trunk, management SVI VLAN 110, unused-port hardening.
-- branch-vlan-plan.txt — only if needed as a concise device-side checklist.
+Planned configurations after Packet Tracer model/interface confirmation:
+- BR-RTR1: WAN 198.51.100.2/30; router-on-a-stick subinterfaces VLAN 10 (10.20.10.1/24) and VLAN 99 (10.20.99.1/24); routing, ACLs, secure management, and planned IPsec.
+- BR-SW1: VLANs 10, 99, 999; router-facing trunk allows VLANs 10 and 99 with native VLAN 999; management SVI 10.20.99.2/24; unused ports shut down and assigned VLAN 999.
+- BR-PC1: VLAN 10 STAFF, 10.20.10.10/24, gateway 10.20.10.1.
 
-BR-RTR1 subinterfaces provide the branch VLAN gateways. BR-SW1 must not be assigned gateway SVIs for VLANs 120, 130, or 140.
+Do not use VLANs 110–140 in this design. The agreed branch VLANs are 10 STAFF, 99 MGMT, and 999 BLACKHOLE/native.

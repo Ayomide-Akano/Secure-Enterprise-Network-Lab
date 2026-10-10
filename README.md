@@ -2,7 +2,7 @@
 
 Cisco Packet Tracer enterprise network design. This repository defines the architecture before the simulation is built.
 
-**Current state:** Documentation is being corrected to match the agreed design. The Packet Tracer simulation has not been built and no connectivity, security, VPN, or failover tests are claimed as passed.
+**Current state:** The agreed design has been aligned across the documentation on the audit branch. Visual review and device-model/port validation remain. The Packet Tracer simulation has not been built and no connectivity, security, VPN, or failover tests are claimed as passed.
 
 ## Source of truth
 

@@ -18,7 +18,7 @@
         <mxCell id="bpc" value="BR-PC1&#xa;VLAN 120&#xa;10.20.20.10/24" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1"><mxGeometry x="455" y="835" width="200" height="55" as="geometry"/></mxCell>
         <mxCell id="e1" value="203.0.113.0/30" style="endArrow=none;html=1;rounded=0;" edge="1" parent="1" source="isp" target="fw"><mxGeometry relative="1" as="geometry"/></mxCell>
         <mxCell id="e2" value="VLAN 901 transit" style="endArrow=none;html=1;rounded=0;" edge="1" parent="1" source="fw" target="c1"><mxGeometry relative="1" as="geometry"/></mxCell>
-        <mxCell id="e3" value="2-link LACP EtherChannel; VLAN 901" style="endArrow=none;html=1;strokeWidth=3;" edge="1" parent="1" source="c1" target="c2"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e3" value="2-link LACP EtherChannel; VLANs 10,20,30,40,901; native 999" style="endArrow=none;html=1;strokeWidth=3;" edge="1" parent="1" source="c1" target="c2"><mxGeometry relative="1" as="geometry"/></mxCell>
         <mxCell id="e4" value="Trunk" style="endArrow=none;html=1;" edge="1" parent="1" source="c1" target="a1"><mxGeometry relative="1" as="geometry"/></mxCell>
         <mxCell id="e5" value="Trunk" style="endArrow=none;html=1;" edge="1" parent="1" source="c1" target="a2"><mxGeometry relative="1" as="geometry"/></mxCell>
         <mxCell id="e6" value="Trunk" style="endArrow=none;html=1;" edge="1" parent="1" source="c2" target="a1"><mxGeometry relative="1" as="geometry"/></mxCell>
@@ -29,7 +29,7 @@
         <mxCell id="e11" value="203.0.113.4/30" style="endArrow=none;html=1;" edge="1" parent="1" source="isp" target="brr"><mxGeometry relative="1" as="geometry"/></mxCell>
         <mxCell id="e12" value="802.1Q trunk VLANs 110–140" style="endArrow=none;html=1;" edge="1" parent="1" source="brr" target="bsw"><mxGeometry relative="1" as="geometry"/></mxCell>
         <mxCell id="e13" value="Access VLAN 120" style="endArrow=none;html=1;" edge="1" parent="1" source="bsw" target="bpc"><mxGeometry relative="1" as="geometry"/></mxCell>
-        <mxCell id="note" value="HQ VLANs: 10 management, 20 users, 30 servers, 40 guest, 50 DMZ, 901 firewall transit. VLAN 999 native/unused; VLAN 998 parking/unused. Planned IPsec VPN between HQ-FW1 and BR-RTR1. Firewall-to-CORE-SW1 link is a single point of failure. Diagram is design-only, not proof of implementation." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;align=left;" vertex="1" parent="1"><mxGeometry x="30" y="575" width="350" height="210" as="geometry"/></mxCell>
+        <mxCell id="note" value="HQ VLANs: 10 management, 20 users, 30 servers, 40 guest, 50 DMZ, 901 firewall transit. VLAN 999 native/unused; VLAN 998 parking/unused at both sites. Planned IPsec VPN between HQ-FW1 and BR-RTR1. Firewall-to-CORE-SW1 link is a single point of failure. Diagram is design-only, not proof of implementation." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;align=left;" vertex="1" parent="1"><mxGeometry x="30" y="575" width="350" height="210" as="geometry"/></mxCell>
       </root>
     </mxGraphModel>
   </diagram>

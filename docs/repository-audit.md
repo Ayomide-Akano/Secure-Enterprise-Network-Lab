@@ -46,4 +46,4 @@ For HQ internal VLANs 10,20,30,40,50,99, the HSRP VIP is .1, CORE-SW1 is .2, COR
 
 ## Verification status
 
-The documentation baseline and detailed design files are being corrected. Packet Tracer has not been built, so no simulation behavior is verified. No VPN, ACL, NAT, HSRP, EtherChannel, STP, AAA, or failover behavior is claimed as tested.
+The documentation baseline and detailed design files have been revised to match the user's agreed plan. Static cross-file checks show no active references to VLAN 901, branch VLANs 110–140, or the superseded branch WAN /30. Packet Tracer has not been built, so no simulation behavior is verified. No VPN, ACL, NAT, HSRP, EtherChannel, STP, AAA, or failover behavior is claimed as tested.

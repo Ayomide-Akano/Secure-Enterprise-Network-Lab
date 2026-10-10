@@ -39,6 +39,22 @@ Design a secure enterprise network connecting a Headquarters (HQ) and a Branch o
 - Internal routing with OSPF or static routes depending on scale
 - Optional VPN tunnels for secure inter-site connectivity
 
+## Physical Cable Map
+
+| # | From | To | Cable | Purpose |
+|---|------|----|-------|---------|
+| 1 | HQ-CORE-SW1 (2 ports) | HQ-CORE-SW2 (2 ports) | Copper straight (two links) | Core interconnect, later an EtherChannel |
+| 2 | HQ-CORE-SW1 | HQ-ACC-SW1 | Copper straight | Uplink |
+| 3 | HQ-CORE-SW1 | HQ-ACC-SW2 | Copper straight | Uplink |
+| 4 | HQ-CORE-SW2 | HQ-ACC-SW1 | Copper straight | Redundant uplink |
+| 5 | HQ-CORE-SW2 | HQ-ACC-SW2 | Copper straight | Redundant uplink |
+| 6 | HQ-CORE-SW1 | HQ-FW1 (inside) | Copper straight | Core to firewall |
+| 7 | HQ-FW1 (outside) | ISP-RTR | Copper straight | Internet link |
+| 8 | HQ-FW1 (DMZ) | DMZ-SW1 | Copper straight | DMZ zone |
+| 9 | ISP-RTR | BR-RTR1 | Copper straight | Branch WAN |
+| 10 | BR-RTR1 | BR-SW1 | Copper straight | Branch LAN |
+| 11 | Endpoints | Their switches | Copper straight | PCs on access, WEB-SRV1 on DMZ-SW1, AAA-SRV1 on HQ-CORE-SW2, BR-PC1 on BR-SW1 |
+
 ## Security Controls
 
 - ACLs on interfaces

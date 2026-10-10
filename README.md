@@ -16,7 +16,7 @@ Start with [Canonical Design Baseline](docs/design-baseline.md). Keep the detail
 - DMZ VLAN 50 is behind the firewall; no HQ core SVI exists for VLAN 50.
 - Branch router-on-a-stick provides gateways for VLANs 110, 120, 130, and 140.
 - Planned site-to-site IPsec VPN between HQ-FW1 and BR-RTR1.
-- VLAN 999 is native/unused; VLAN 998 is the unused-port parking VLAN. Neither has an IP address.
+- VLAN 999 is native/unused; VLAN 998 is the unused-port parking VLAN at both sites. Neither has an IP address. Trunks have explicit allowed-VLAN lists; VLAN 50 is excluded from HQ core trunks.
 
 The single physical firewall-to-CORE-SW1 link is a known single point of failure. The project must not claim full end-to-end redundancy unless this is redesigned and tested.
 

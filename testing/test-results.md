@@ -1,60 +1,66 @@
 # Test Plan and Results
 
-**Current phase:** Pre-build design consistency. The Packet Tracer topology has not yet been built. No connectivity, security, or failover tests are claimed as passed.
+**Current phase:** Pre-build design consistency. The Packet Tracer simulation has not been built. No connectivity, security, VPN, or failover tests are claimed as passed.
 
 ## Recording rules
 
-For each test, record date/time, Packet Tracer version/file, devices/interfaces, action or command, expected result, observed result, status, and evidence path. Leave status Not run until executed. If a feature is unsupported, mark it Blocked/Unsupported and describe the limitation.
+For every test, record date/time, Packet Tracer version/file, devices/interfaces, command or action, expected result, observed result, status, and evidence path. Leave tests Not run until executed. If a feature is unsupported, mark Blocked/Unsupported and explain the limitation.
 
 ## Static design checks
 
 | ID | Check | Expected result | Status |
 |---|---|---|---|
-| DES-01 | VLAN IDs/names across baseline, IP plan, design, diagram | Exact match | Pending |
-| DES-02 | Subnets, masks, gateways, interface IPs | No overlap; gateway ownership matches routing model | Pending |
-| DES-03 | Cable endpoints and port names | Each link matches the port map and selected device models | Pending |
-| DES-04 | Trunk/native VLAN plan | Core-to-core allows 10,20,30,40,901; HQ access trunks 10,20,30,40; branch trunk 110,120,130,140; native 999; VLAN 50 excluded from core trunks | Pending |
-| DES-05 | Device inventory/endpoints | Every diagram device appears in inventory and every endpoint has a VLAN/zone | Pending |
-| DES-06 | DMZ architecture | VLAN 50 is behind HQ-FW1; no core SVI for VLAN 50 | Pending |
-| DES-07 | Branch routing model | BR-RTR1 subinterfaces are gateways; BR-SW1 only has VLAN 110 management SVI | Pending |
+| DES-01 | VLAN IDs/names across baseline, IP plan, network design, and diagram | HQ VLANs 10 STAFF, 20 FINANCE, 30 IT-ADMIN, 40 GUEST, 50 SERVERS, 99 MGMT, 60 DMZ, 999 BLACKHOLE/native; branch VLANs 10 STAFF, 99 MGMT, 999 BLACKHOLE/native | Pending |
+| DES-02 | HQ internal subnets/gateways | VLANs 10/20/30/40/50/99 use 10.10.<VLAN>.0/24 and HSRP .1; core SVIs .2/.3 | Pending |
+| DES-03 | DMZ separation | VLAN 60 uses 172.16.60.0/24; firewall gateway .1; no core SVI and no VLAN 60 on core trunks | Pending |
+| DES-04 | Branch subnets | VLAN 10 uses 10.20.10.0/24; VLAN 99 uses 10.20.99.0/24; BR-RTR1 provides .1 gateways | Pending |
+| DES-05 | WAN and firewall routed link | HQ WAN 203.0.113.0/30; branch WAN 198.51.100.0/30; inside routed link 10.10.254.0/30; no overlap | Pending |
+| DES-06 | Cable endpoints/port labels | Every link matches the port map and selected device models | Pending |
+| DES-07 | Trunk/native policy | HQ trunks allow 10,20,30,40,50,99; branch trunk allows 10,99; native VLAN 999; VLAN 60 excluded from core trunks | Pending |
+| DES-08 | Management policy and IP assignments | HQ switches use VLAN 99; only IT-ADMIN is authorized to enter HQ MGMT; branch switch uses 10.20.99.2 | Pending |
+| DES-09 | Device inventory and endpoint VLANs | Every diagram device appears in inventory; each endpoint has a VLAN and address | Pending |
 
 ## Connectivity/routing tests after build
 
 | ID | Action | Expected result | Status | Observed/evidence |
 |---|---|---|---|---|
-| NET-01 | HQ endpoint pings its default gateway | Gateway responds | Not run | |
-| NET-02 | Test approved HQ user-to-server flows | Only approved services succeed | Not run | |
-| NET-03 | Ping HQ-FW1 inside 10.10.1.254 from core | Reachable over VLAN 901 | Not run | |
-| NET-04 | Ping WEB-SRV1 gateway 10.10.50.1 | Reachable | Not run | |
-| NET-05 | BR-PC1 pings 10.20.20.1 | Branch gateway responds | Not run | |
-| NET-06 | Verify both ISP WAN /30 links | Separate, non-overlapping subnets | Not run | |
-| NET-07 | Test routes before/after IPsec setup | Route and encryption behavior matches the intended design | Not run | |
-| NET-08 | Verify return routes | Replies follow an expected path | Not run | |
+| NET-01 | HQ STAFF PC pings 10.10.10.1 | HSRP gateway responds | Not run | |
+| NET-02 | HQ FINANCE PC pings 10.10.20.1 | HSRP gateway responds | Not run | |
+| NET-03 | HQ IT-ADMIN PC pings 10.10.30.1 | HSRP gateway responds | Not run | |
+| NET-04 | HQ core reaches HQ-FW1 inside 10.10.254.2 | Routed /30 link responds | Not run | |
+| NET-05 | AAA-SRV1 pings 10.10.50.1 | Server gateway responds | Not run | |
+| NET-06 | WEB-SRV1 pings 172.16.60.1 | Firewall DMZ gateway responds | Not run | |
+| NET-07 | BR-PC1 pings 10.20.10.1 | Branch staff gateway responds | Not run | |
+| NET-08 | BR-SW1 management reachability | 10.20.99.2 is reachable from approved management source only | Not run | |
+| NET-09 | Verify HQ and branch WAN links | Separate /30s are correctly addressed | Not run | |
+| NET-10 | Verify return routes before/after IPsec setup | Routing and encryption match intended policy | Not run | |
 
 ## Security tests after policy configuration
 
 | ID | Action | Expected result | Status | Observed/evidence |
 |---|---|---|---|---|
-| TEST-SEC-01 | SSH to devices from HQ management VLAN 10 | Allowed with authentication | Not run | |
-| TEST-SEC-02 | Attempt management access from HQ users VLAN 20 | Denied | Not run | |
-| TEST-SEC-03 | Attempt HQ internal access from guest VLAN 40 | Denied | Not run | |
-| TEST-SEC-04 | Test approved guest external services | Approved services work; others denied | Not run | |
-| TEST-SEC-05 | Attempt outside access to WEB-SRV1 | Only explicitly published HTTP/HTTPS allowed | Not run | |
-| TEST-SEC-06 | Attempt DMZ-to-HQ internal access | Denied by default | Not run | |
-| TEST-SEC-07 | Access AAA-SRV1 on required ports | Approved service works; unrelated ports blocked | Not run | |
-| TEST-SEC-08 | Attempt branch guest VLAN 140 to branch internal networks | Denied | Not run | |
-| TEST-SEC-09 | Test approved/unapproved branch-to-HQ flows | Approved flows through VPN work; unapproved flows fail | Not run | |
-| TEST-SEC-10 | Attempt device management from untrusted WAN | Denied | Not run | |
+| TEST-SEC-01 | SSH to network devices from HQ IT-ADMIN VLAN 30 | Allowed with authentication | Not run | |
+| TEST-SEC-02 | Attempt access to HQ management VLAN 99 from STAFF, FINANCE, GUEST, or SERVERS | Denied | Not run | |
+| TEST-SEC-03 | Attempt HQ STAFF VLAN 10 to FINANCE VLAN 20 | Denied | Not run | |
+| TEST-SEC-04 | Test approved FINANCE services | Approved services work; unapproved traffic is denied | Not run | |
+| TEST-SEC-05 | Attempt HQ guest access to internal subnets | Denied | Not run | |
+| TEST-SEC-06 | Test approved guest Internet services | Approved services work; other traffic is denied | Not run | |
+| TEST-SEC-07 | Access AAA-SRV1 on required service ports | Approved services work; unrelated ports are blocked | Not run | |
+| TEST-SEC-08 | Attempt outside access to WEB-SRV1 | Only explicitly published HTTP/HTTPS ports are allowed | Not run | |
+| TEST-SEC-09 | Attempt DMZ-to-HQ internal access | Denied by default | Not run | |
+| TEST-SEC-10 | Attempt branch STAFF access to branch MGMT | Denied | Not run | |
+| TEST-SEC-11 | Test approved and unapproved branch-to-HQ flows | Only approved flows through configured VPN succeed | Not run | |
+| TEST-SEC-12 | Attempt device management from untrusted WAN | Denied | Not run | |
 
 ## Redundancy and Layer 2 tests after build
 
 | ID | Action | Expected result | Status | Observed/evidence |
 |---|---|---|---|---|
 | HA-01 | Inspect HQ core LACP EtherChannel | Both links bundled in one channel | Not run | |
-| HA-02 | Inspect STP topology | No L2 loop; expected root/blocked ports | Not run | |
-| HA-03 | Disable active HSRP core/SVI in controlled test | HSRP role changes and gateway connectivity recovers | Not run | |
+| HA-02 | Inspect STP topology | No Layer-2 loop; root/blocked ports match intended design | Not run | |
+| HA-03 | Disable active HSRP core/SVI in controlled test | HSRP role changes and local gateway connectivity recovers | Not run | |
 | HA-04 | Disconnect one access uplink | Connectivity remains through surviving path where topology permits | Not run | |
-| HA-05 | Disconnect firewall-to-CORE-SW1 link | Firewall reachability is lost; known single point of failure is documented | Not run | |
+| HA-05 | Disconnect HQ-CORE-SW1 or its firewall link | External routing is impaired as documented; this is a known design dependency | Not run | |
 
 ## Evidence template
 
@@ -71,7 +77,7 @@ For each test, record date/time, Packet Tracer version/file, devices/interfaces,
 
 ## Current implementation status
 
-- Design baseline: being reconciled.
+- Canonical VLAN/IP baseline: updated to the user's agreed design.
 - Packet Tracer topology: not built.
 - Device configurations: not created/verified.
-- Connectivity/security/failover tests: not run.
+- Connectivity, security, VPN, and failover tests: not run.

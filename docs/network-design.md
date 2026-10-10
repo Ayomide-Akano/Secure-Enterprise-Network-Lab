@@ -148,6 +148,17 @@ flowchart TB
 - AAA-SRV1: authentication, authorization, and accounting server
 - BR-PC1: example branch user workstation
 
+## Design Rationale
+
+### 1. Redundant Core Switches (Availability)
+The HQ network uses two core switches (HQ-CORE-SW1 and HQ-CORE-SW2), and every access switch has an uplink to both. If one core switch fails or goes offline, traffic continues through the other, supporting the Availability pillar of the CIA triad. Spanning Tree Protocol (STP) prevents loops across the redundant paths, and HSRP provides a default gateway that survives a core failure.
+
+### 2. Web Server in the DMZ (Containment / Assume Breach)
+The web server must accept connections from the public Internet, which makes it the most exposed system in the network and the most likely to be attacked. Placing it on the internal network would mean a single compromise gives an attacker a foothold next to sensitive systems. Instead, WEB-SRV1 sits in an isolated DMZ behind the firewall. Firewall policy allows Internet-to-DMZ traffic only on required ports (HTTP/HTTPS), blocks DMZ-to-internal traffic, and blocks Internet-to-internal traffic. If the web server is compromised, the attack is contained within the DMZ and the internal network stays protected.
+
+### 3. Guest and Finance Segmentation (Least Privilege / Limiting Lateral Movement)
+Guest users are untrusted devices. The Guest VLAN (40) is segmented from the Finance VLAN (20) so that a compromised guest device cannot move laterally into sensitive systems. VLANs separate the networks, and ACLs on the Layer 3 core enforce the boundary: Guest traffic is permitted to reach the Internet only and is denied access to all internal VLANs. This follows the principle of least privilege and limits the blast radius of any guest-side compromise.
+
 ## Security Controls
 
 - ACLs on interfaces

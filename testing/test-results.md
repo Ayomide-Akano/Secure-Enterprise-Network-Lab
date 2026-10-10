@@ -16,7 +16,7 @@ For every test, record date/time, Packet Tracer version/file, devices/interfaces
 | DES-04 | Branch subnets | VLAN 10 uses 10.20.10.0/24; VLAN 99 uses 10.20.99.0/24; BR-RTR1 provides .1 gateways | Pending |
 | DES-05 | WAN and firewall routed link | HQ WAN 203.0.113.0/30; branch WAN 198.51.100.0/30; inside routed link 10.10.254.0/30; no overlap | Pending |
 | DES-06 | Cable endpoints/port labels | Every link matches the port map and selected device models | Pending |
-| DES-07 | Trunk/native policy | HQ trunks allow 10,20,30,40,50,99; branch trunk allows 10,99; native VLAN 999; VLAN 60 excluded from core trunks | Pending |
+| DES-07 | Trunk/native policy | HQ trunks allow 10,20,30,40,50,99,999; branch trunk allows 10,99,999; native VLAN 999; VLAN 60 excluded from core trunks | Pending |
 | DES-08 | Management policy and IP assignments | HQ switches use VLAN 99; only IT-ADMIN is authorized to enter HQ MGMT; branch switch uses 10.20.99.2 | Pending |
 | DES-09 | Device inventory and endpoint VLANs | Every diagram device appears in inventory; each endpoint has a VLAN and address | Pending |
 

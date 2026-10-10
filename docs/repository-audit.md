@@ -19,7 +19,7 @@ A canonical design baseline was added at docs/design-baseline.md. The following 
 - HQ-FW1 owns the DMZ gateway 10.10.50.1; DMZ-SW1 is 10.10.50.2; WEB-SRV1 is 10.10.50.20. No HQ core SVI exists for VLAN 50.
 - Branch uses router-on-a-stick. BR-RTR1 subinterfaces are gateways for VLANs 110–140; BR-SW1 has only management SVI 10.20.10.2 in VLAN 110.
 - The HQ and branch ISP links use separate /30s: 203.0.113.0/30 and 203.0.113.4/30.
-- VLAN 999 is native/unused with no SVI/IP; VLAN 998 is the unused-port parking VLAN with no SVI/IP.
+- VLAN 999 is native/unused with no SVI/IP at both sites; VLAN 998 is the unused-port parking VLAN with no SVI/IP at both sites. Core-to-core trunks allow VLANs 10, 20, 30, 40, and 901; HQ access trunks allow 10, 20, 30, and 40; the branch trunk allows 110, 120, 130, and 140. Native VLAN is 999; VLAN 50 is excluded from HQ core trunks.
 - PC-STAFF1 and PC-FIN1 are VLAN 20, PC-ADMIN1 VLAN 10, PC-GUEST1 VLAN 40. There is no separate Finance VLAN.
 - The planned IPsec peers are HQ-FW1 outside and BR-RTR1 WAN.
 - The single firewall-to-CORE-SW1 link is explicitly documented as a single point of failure.
@@ -54,8 +54,8 @@ Text files and diagram source were reviewed and reconciled. The topology has not
 | Area | Status | Reason |
 |---|---|---|
 | Canonical design baseline | Written | One declared source of truth |
-| IP/VLAN consistency | Reconciled in documents | Requires final cross-file check |
-| Cable/port map | Documented | Port labels require selected-model confirmation |
+| IP/VLAN consistency | Reconciled in documents | Static conflict-pattern checks completed; device-model and visual review still pending |
+| Cable/port map | Documented | Allowed VLANs are explicit; port labels require selected-model confirmation |
 | Security policy | Documented | Configuration and tests pending |
 | Draw.io source | Replaced | Visual review pending |
 | Packet Tracer file | Not present yet | User has not built the simulation yet |

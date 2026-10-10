@@ -41,7 +41,8 @@ PC-FIN1 is in HQ users VLAN 20; this baseline has no separate Finance VLAN. PC-A
 | Branch | 120 | BR-USERS | 10.20.20.0/24 | 10.20.20.1 BR-RTR1 |
 | Branch | 130 | BR-SERVICES | 10.20.30.0/24 | 10.20.30.1 BR-RTR1 |
 | Branch | 140 | BR-GUEST | 10.20.40.0/24 | 10.20.40.1 BR-RTR1 |
-| Branch | 999 | NATIVE-UNUSED | No IP | None |\n| Branch | 998 | PARKING-UNUSED | No IP | None |
+| Branch | 999 | NATIVE-UNUSED | No IP | None |
+| Branch | 998 | PARKING-UNUSED | No IP | None |
 
 HQ HSRP runs on VLANs 10, 20, 30, 40, and 901. VLAN 50 is behind HQ-FW1 and has no HQ core SVI. BR-RTR1 subinterfaces provide the branch VLAN gateways; BR-SW1 routes none of the user VLANs.
 

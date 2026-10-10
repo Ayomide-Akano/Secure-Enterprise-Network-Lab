@@ -1,56 +1,60 @@
 # Secure Enterprise Network Lab — HQ + Branch
 
-A Cisco Packet Tracer enterprise-network design project. The goal is a consistent, documented architecture before the lab is built.
+Cisco Packet Tracer enterprise network design. This repository defines the architecture before the simulation is built.
 
-**Current state:** The core design documents have been reconciled and static cross-file checks completed on the audit branch; visual review and device-model validation remain. The Packet Tracer simulation has not yet been built. No connectivity, security, VPN, or failover tests are claimed as passed.
+**Current state:** Documentation is being corrected to match the agreed design. The Packet Tracer simulation has not been built and no connectivity, security, VPN, or failover tests are claimed as passed.
 
 ## Source of truth
 
-Start with [Canonical Design Baseline](docs/design-baseline.md). Keep the detailed [IP Addressing Plan](docs/ip-addressing.md), [Network Design and Cable Map](docs/network-design.md), [Security Policy Matrix](docs/security-controls.md), editable diagram, device configurations, and tests aligned with that baseline.
+Start with [Canonical Design Baseline](docs/design-baseline.md). Keep the [IP Addressing Plan](docs/ip-addressing.md), [Network Design and Cable Map](docs/network-design.md), [Security Controls](docs/security-controls.md), diagram, configuration notes, and tests aligned with that baseline.
 
-## Architecture at a glance
+## Agreed VLAN design
 
-- HQ Layer-3 core pair with HSRP for VLANs 10, 20, 30, 40, and 901.
-- Two HQ access switches dual-homed to both cores; the two core-to-core links are one LACP EtherChannel.
-- HQ firewall with outside, inside/transit, and DMZ interfaces.
-- DMZ VLAN 50 is behind the firewall; no HQ core SVI exists for VLAN 50.
-- Branch router-on-a-stick provides gateways for VLANs 110, 120, 130, and 140.
-- Planned site-to-site IPsec VPN between HQ-FW1 and BR-RTR1.
-- VLAN 999 is native/unused; VLAN 998 is the unused-port parking VLAN at both sites. Neither has an IP address. Trunks have explicit allowed-VLAN lists; VLAN 50 is excluded from HQ core trunks.
+| VLAN | Name | HQ subnet | Purpose |
+|---:|---|---|---|
+| 10 | STAFF | 10.10.10.0/24 | Everyday work; may reach approved servers/Internet, not FINANCE |
+| 20 | FINANCE | 10.10.20.0/24 | Sensitive financial data; only specifically approved traffic |
+| 30 | IT-ADMIN | 10.10.30.0/24 | Network administrators; only authorized source for HQ management VLAN |
+| 40 | GUEST | 10.10.40.0/24 | Internet only; denied internal access |
+| 50 | SERVERS | 10.10.50.0/24 | AAA, syslog, DHCP, DNS and other internal services |
+| 99 | MGMT | 10.10.99.0/24 | Switch management and SSH; only IT-ADMIN may enter |
+| 60 | DMZ | 172.16.60.0/24 | Public-facing servers on DMZ-SW1; firewall is gateway |
+| 999 | BLACKHOLE/native | No subnet | Native VLAN on trunks and shutdown unused-port parking; no IP/SVI |
 
-The single physical firewall-to-CORE-SW1 link is a known single point of failure. The project must not claim full end-to-end redundancy unless this is redesigned and tested.
+For HQ internal VLANs 10, 20, 30, 40, 50, and 99, .1 is the HSRP virtual gateway, .2 is CORE-SW1, and .3 is CORE-SW2. The DMZ uses the firewall gateway 172.16.60.1 and is not routed by an HQ core SVI.
+
+## Branch design
+
+- VLAN 10 STAFF: 10.20.10.0/24, BR-RTR1 gateway 10.20.10.1.
+- VLAN 99 MGMT: 10.20.99.0/24, BR-RTR1 gateway 10.20.99.1, BR-SW1 management 10.20.99.2.
+- VLAN 999 is native/blackhole with no IP subnet.
+- HQ WAN: 203.0.113.0/30. Branch WAN: 198.51.100.0/30.
+- HQ firewall inside uses a routed /30 to CORE-SW1: 10.10.254.0/30. CORE-SW2's default route depends on CORE-SW1; this limitation is documented.
 
 ## Repository map
 
 | Path | Purpose | State |
 |---|---|---|
-| docs/design-baseline.md | Canonical architecture/addressing decisions | Working baseline |
-| docs/ip-addressing.md | Detailed IP/interface register | Must match baseline |
-| docs/network-design.md | Device roles, VLANs, cabling, topology | Must match baseline |
-| docs/security-controls.md | Planned zone policy and control mapping | Design only |
-| docs/repository-audit.md | Audit findings and remediation record | Audit log |
-| diagrams/hq-branch-topology.drawio | Editable design diagram | Updated to canonical baseline |
-| diagrams/hq-branch-topology.drawio.png | Exported preview | Removed while stale; regenerate after visual review |
-| configs/hq/README.md | Planned HQ configuration inventory | No device configs yet |
-| configs/branch/README.md | Planned branch configuration inventory | No device configs yet |
-| packet-tracer/README.md | Packet Tracer build handoff | Real .pkt file not yet created |
-| testing/test-results.md | Static, connectivity, security, and failover test matrix | Tests not run |
+| docs/design-baseline.md | Canonical architecture and assignments | Source of truth |
+| docs/ip-addressing.md | Detailed address register | Must match baseline |
+| docs/network-design.md | Device roles, cable map and topology | Must match baseline |
+| docs/security-controls.md | Policy matrix and hardening intent | Design only |
+| docs/repository-audit.md | Audit and remediation record | Audit log |
+| diagrams/hq-branch-topology.drawio | Editable network diagram | Must match baseline |
+| configs/hq/README.md | Planned HQ configuration inventory | No configs yet |
+| configs/branch/README.md | Planned branch configuration inventory | No configs yet |
+| packet-tracer/README.md | Build handoff | Real .pkt file not yet created |
+| testing/test-results.md | Static, connectivity, security and failover tests | Not run |
 
-## Implementation sequence
+## Build sequence
 
-1. Confirm the selected Packet Tracer device models and actual interface names.
-2. Place devices and cable exactly as documented; update the port map everywhere if model ports differ.
-3. Configure VLANs, trunks, native/parking VLANs, EtherChannel, and STP.
-4. Configure HQ SVIs/HSRP and transit VLAN 901.
-5. Configure firewall interfaces, routes, NAT, and DMZ policy.
-6. Configure branch subinterfaces and ISP routing.
-7. Configure VPN, ACLs, SSH, and AAA where supported.
-8. Run every applicable test and attach evidence.
-9. Update status only when evidence supports it.
+1. Confirm device models and port names.
+2. Place devices and cable according to the port map.
+3. Configure VLANs, access ports, trunks, native VLAN 999, unused-port shutdown, EtherChannel and STP.
+4. Configure HQ SVIs/HSRP and the routed firewall link.
+5. Configure firewall interfaces, routes, NAT and DMZ policy.
+6. Configure branch VLANs, router subinterfaces, ISP routing and the planned VPN.
+7. Apply ACLs, SSH/authentication, and other supported security controls.
+8. Run the test matrix and save evidence.
 
-## Safety and accuracy
-
-- 203.0.113.0/24 is documentation-only address space, not a real public allocation.
-- Never commit real passwords, VPN keys, private keys, or other secrets.
-- Confirm feature support for the selected Packet Tracer devices.
-- Distinguish designed, configured, simulated, and verified. A document or diagram does not prove a control works.
+Never commit real passwords, VPN secrets, private keys, or other credentials. Distinguish designed, configured, simulated, and verified; documentation alone does not prove a control works.

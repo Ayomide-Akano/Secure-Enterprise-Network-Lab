@@ -47,7 +47,7 @@ HSRP is planned on VLANs 10, 20, 30, 40, and 901, with CORE-SW1 preferred active
 | 110 | BR-MGMT | 10.20.10.0/24 | 10.20.10.1 | SVI 10.20.10.2/24 |
 | 120 | BR-USERS | 10.20.20.0/24 | 10.20.20.1 | No SVI |
 | 130 | BR-SERVICES | 10.20.30.0/24 | 10.20.30.1 | No SVI |
-| 140 | BR-GUEST | 10.20.40.0/24 | 10.20.40.1 | No SVI |
+| 140 | BR-GUEST | 10.20.40.0/24 | 10.20.40.1 | No SVI |\n| 999 | NATIVE-UNUSED | No IP subnet | None | No SVI |\n| 998 | PARKING-UNUSED | No IP subnet | None | No SVI |
 
 | Device | Interface | VLAN/zone | Address | Notes |
 |---|---|---|---|---|

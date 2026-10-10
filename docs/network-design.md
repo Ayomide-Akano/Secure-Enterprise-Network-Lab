@@ -1,196 +1,132 @@
 # Network Design
 
-## Objective
-Design a secure enterprise network connecting a Headquarters (HQ) and a Branch office while enforcing segmentation, redundancy, and access control.
+**Source of truth:** docs/design-baseline.md and docs/ip-addressing.md. This is the physical/logical architecture plan; the Packet Tracer lab has not yet been built.
 
-## High-Level Topology
+## Objective and architecture
 
-- HQ: core services, management, user access, security services
-- Branch: remote site connectivity, local users, optional branch services
-- WAN: routed connectivity between HQ and Branch
-- Security boundary: firewall, ACLs, VPN, identity-based access
+Build a segmented HQ and Branch network with Layer-3 HQ core switching, HSRP, dual-homed access switches, a firewall-controlled DMZ, branch router-on-a-stick, and a planned site-to-site IPsec VPN.
 
-## Design Principles
+## Device inventory and endpoint VLANs
 
-1. Separate user, management, server, and guest traffic.
-2. Use route summarization and structured addressing.
-3. Apply least-privilege firewall policies.
-4. Ensure redundancy where possible.
-5. Centralize logging and monitoring.
+| Device | Role/site | VLAN/zone or address |
+|---|---|---|
+| ISP-RTR | Provider simulation | Gi0/0 203.0.113.1/30; Gi0/1 203.0.113.5/30 |
+| HQ-FW1 | HQ perimeter firewall | Outside 203.0.113.2/30; inside 10.10.1.254/24; DMZ 10.10.50.1/24 |
+| HQ-CORE-SW1 | Preferred active Layer-3 core | VLAN 10/20/30/40/901 SVIs ending .2 |
+| HQ-CORE-SW2 | Standby Layer-3 core | VLAN 10/20/30/40/901 SVIs ending .3 |
+| HQ-ACC-SW1 | HQ access switch | PC-STAFF1 and PC-FIN1, VLAN 20 |
+| HQ-ACC-SW2 | HQ access switch | PC-ADMIN1 VLAN 10; PC-GUEST1 VLAN 40 |
+| DMZ-SW1 | DMZ access switch | VLAN 50; management 10.10.50.2/24 |
+| WEB-SRV1 | DMZ web server | VLAN 50, 10.10.50.20/24 |
+| AAA-SRV1 | HQ server | VLAN 30, 10.10.30.10/24 |
+| BR-RTR1 | Branch router | WAN 203.0.113.6/30; router-on-a-stick gateways |
+| BR-SW1 | Branch access switch | VLAN 110 management SVI 10.20.10.2/24 |
+| BR-PC1 | Branch workstation | VLAN 120, 10.20.20.10/24 |
 
-## Device Inventory
+PC-FIN1 is in HQ users VLAN 20; this baseline has no separate Finance VLAN. PC-ADMIN1 is in HQ management VLAN 10, with administrative access restricted by policy.
 
-| Device Name | Role | Location | Notes |
-|-------------|------|----------|-------|
-| HQ-CORE-SW1 | Core switch | HQ | Primary aggregation and distribution layer |
-| HQ-CORE-SW2 | Core switch | HQ | Redundant core switch for resilience |
-| HQ-ACC-SW1 | Access switch | HQ | User access layer |
-| HQ-ACC-SW2 | Access switch | HQ | Secondary access layer |
-| HQ-FW1 | Firewall | HQ | Internet edge and policy enforcement |
-| DMZ-SW1 | DMZ switch | HQ | Public-facing services |
-| ISP-RTR | Internet edge router | ISP | WAN/Internet provider connection |
-| BR-RTR1 | Branch router | Branch | Site-to-site WAN termination |
-| BR-SW1 | Branch access switch | Branch | Branch endpoint aggregation |
-| WEB-SRV1 | Web server | DMZ | Public-facing server |
-| AAA-SRV1 | AAA server | HQ | Authentication and accounting services |
-| BR-PC1 | Branch endpoint | Branch | End-user workstation |
-| USER-PCs | End-user hosts | HQ / Branch | Standard office endpoints |
+## VLAN and gateway map
 
-## VLAN Mapping
+| Site | VLAN | Name | Subnet | Gateway |
+|---|---:|---|---|---|
+| HQ | 10 | HQ-MGMT | 10.10.10.0/24 | 10.10.10.1 HSRP |
+| HQ | 20 | HQ-USERS | 10.10.20.0/24 | 10.10.20.1 HSRP |
+| HQ | 30 | HQ-SERVERS | 10.10.30.0/24 | 10.10.30.1 HSRP |
+| HQ | 40 | HQ-GUEST | 10.10.40.0/24 | 10.10.40.1 HSRP |
+| HQ | 50 | HQ-DMZ | 10.10.50.0/24 | 10.10.50.1 HQ-FW1 |
+| HQ | 901 | HQ-FW-TRANSIT | 10.10.1.0/24 | 10.10.1.1 HSRP |
+| HQ | 999 | NATIVE-UNUSED | No IP | None |
+| HQ | 998 | PARKING-UNUSED | No IP | None |
+| Branch | 110 | BR-MGMT | 10.20.10.0/24 | 10.20.10.1 BR-RTR1 |
+| Branch | 120 | BR-USERS | 10.20.20.0/24 | 10.20.20.1 BR-RTR1 |
+| Branch | 130 | BR-SERVICES | 10.20.30.0/24 | 10.20.30.1 BR-RTR1 |
+| Branch | 140 | BR-GUEST | 10.20.40.0/24 | 10.20.40.1 BR-RTR1 |
 
-| VLAN ID | Name | Subnet | Gateway | Purpose |
-|--------|------|--------|---------|---------|
-| 10 | HQ-MGMT | 10.10.10.0/24 | 10.10.10.1 | Management and infrastructure |
-| 20 | HQ-USERS | 10.10.20.0/24 | 10.10.20.1 | Office users |
-| 30 | HQ-SERVERS | 10.10.30.0/24 | 10.10.30.1 | Internal server resources |
-| 40 | HQ-GUEST | 10.10.40.0/24 | 10.10.40.1 | Guest access |
-| 50 | HQ-DMZ | 10.10.50.0/24 | 10.10.50.1 | Public-facing DMZ services |
-| 110 | BR-MGMT | 10.20.10.0/24 | 10.20.10.1 | Branch management |
-| 120 | BR-USERS | 10.20.20.0/24 | 10.20.20.1 | Branch user LAN |
-| 130 | BR-SERVICES | 10.20.30.0/24 | 10.20.30.1 | Branch local services |
-| 140 | BR-GUEST | 10.20.40.0/24 | 10.20.40.1 | Guest access |
-| 999 | NATIVE/UNUSED | - | - | Reserved for future use or lab expansion |
+HQ HSRP runs on VLANs 10, 20, 30, 40, and 901. VLAN 50 is behind HQ-FW1 and has no HQ core SVI. BR-RTR1 subinterfaces provide the branch VLAN gateways; BR-SW1 routes none of the user VLANs.
 
-## IP Allocation per Interface
+## Physical cable and port map
 
-| Device | Interface | IP Address | Mask | Description |
-|--------|-----------|-----------|------|-------------|
-| ISP-RTR | Gi0/0 | 203.0.113.1 | /30 | Provider-facing internet side |
-| ISP-RTR | Gi0/1 | 172.16.10.1 | /30 | WAN side to branch router |
-| HQ-FW1 | Outside | 203.0.113.2 | /30 | Internet-facing firewall interface |
-| HQ-FW1 | Inside | 10.10.1.1 | /24 | Core connectivity to HQ internal network |
-| HQ-FW1 | DMZ | 10.10.50.1 | /24 | DMZ firewall interface |
-| HQ-CORE-SW1 | VLAN 10 | 10.10.10.1 | /24 | Management SVI |
-| HQ-CORE-SW1 | VLAN 20 | 10.10.20.1 | /24 | Users SVI |
-| HQ-CORE-SW1 | VLAN 30 | 10.10.30.1 | /24 | Servers SVI |
-| HQ-CORE-SW1 | VLAN 40 | 10.10.40.1 | /24 | Guest SVI |
-| HQ-CORE-SW1 | Link to HQ-FW1 | 10.10.1.2 | /24 | Core-to-firewall inside link |
-| HQ-CORE-SW2 | VLAN 10 | 10.10.10.2 | /24 | Redundant management SVI |
-| HQ-CORE-SW2 | VLAN 20 | 10.10.20.2 | /24 | Redundant users SVI |
-| HQ-CORE-SW2 | VLAN 30 | 10.10.30.2 | /24 | Redundant servers SVI |
-| HQ-CORE-SW2 | VLAN 40 | 10.10.40.2 | /24 | Redundant guest SVI |
-| DMZ-SW1 | VLAN 50 | 10.10.50.2 | /24 | DMZ switch management/IP |
-| WEB-SRV1 | NIC | 10.10.50.10 | /24 | Public web server |
-| AAA-SRV1 | NIC | 10.10.30.10 | /24 | AAA and directory service |
-| BR-RTR1 | WAN | 172.16.10.2 | /30 | Branch WAN link |
-| BR-RTR1 | LAN | 10.20.1.1 | /24 | Branch LAN gateway |
-| BR-SW1 | VLAN 110 | 10.20.10.1 | /24 | Branch management SVI |
-| BR-SW1 | VLAN 120 | 10.20.20.1 | /24 | Branch user SVI |
-| BR-SW1 | VLAN 130 | 10.20.30.1 | /24 | Branch services SVI |
-| BR-SW1 | VLAN 140 | 10.20.40.1 | /24 | Branch guest SVI |
-| BR-PC1 | NIC | 10.20.20.10 | /24 | Branch user workstation |
+These are planned interface labels; confirm the selected Packet Tracer device models before building. If the actual ports differ, revise the table, diagram, and configuration notes together.
 
-## Physical Cable Map
+| # | From | To | Cable/link purpose |
+|---:|---|---|---|
+| 1 | HQ-CORE-SW1 Gi1/0/23 | HQ-CORE-SW2 Gi1/0/23 | Copper straight-through; LACP EtherChannel member 1 |
+| 2 | HQ-CORE-SW1 Gi1/0/24 | HQ-CORE-SW2 Gi1/0/24 | Copper straight-through; LACP EtherChannel member 2 |
+| 3 | HQ-CORE-SW1 Gi1/0/1 | HQ-ACC-SW1 Gi1/0/1 | Copper straight-through; trunk |
+| 4 | HQ-CORE-SW1 Gi1/0/2 | HQ-ACC-SW2 Gi1/0/1 | Copper straight-through; trunk |
+| 5 | HQ-CORE-SW2 Gi1/0/1 | HQ-ACC-SW1 Gi1/0/2 | Copper straight-through; redundant trunk |
+| 6 | HQ-CORE-SW2 Gi1/0/2 | HQ-ACC-SW2 Gi1/0/2 | Copper straight-through; redundant trunk |
+| 7 | HQ-CORE-SW1 Gi1/0/10 | HQ-FW1 inside | Copper straight-through; access in transit VLAN 901 |
+| 8 | HQ-FW1 outside | ISP-RTR Gi0/0 | Copper straight-through; HQ WAN |
+| 9 | HQ-FW1 DMZ | DMZ-SW1 Gi1/0/1 | Copper straight-through; isolated VLAN 50 segment |
+| 10 | ISP-RTR Gi0/1 | BR-RTR1 Gi0/0 | Copper straight-through; branch WAN |
+| 11 | BR-RTR1 Gi0/1 | BR-SW1 Gi1/0/1 | Copper straight-through; 802.1Q trunk for VLANs 110–140 |
+| 12 | BR-SW1 Gi1/0/2 | BR-PC1 NIC | Copper straight-through; access VLAN 120 |
+| 13 | HQ-ACC-SW1 access port | PC-STAFF1 NIC | Copper straight-through; access VLAN 20 |
+| 14 | HQ-ACC-SW1 access port | PC-FIN1 NIC | Copper straight-through; access VLAN 20 |
+| 15 | HQ-ACC-SW2 access port | PC-ADMIN1 NIC | Copper straight-through; access VLAN 10 |
+| 16 | HQ-ACC-SW2 access port | PC-GUEST1 NIC | Copper straight-through; access VLAN 40 |
+| 17 | HQ-CORE-SW2 access port | AAA-SRV1 NIC | Copper straight-through; access VLAN 30 |
+| 18 | DMZ-SW1 access port | WEB-SRV1 NIC | Copper straight-through; access VLAN 50 |
 
-| # | From | To | Cable | Purpose |
-|---|------|----|-------|---------|
-| 1 | HQ-CORE-SW1 (2 ports) | HQ-CORE-SW2 (2 ports) | Copper straight (two links) | Core interconnect, later an EtherChannel |
-| 2 | HQ-CORE-SW1 | HQ-ACC-SW1 | Copper straight | Uplink |
-| 3 | HQ-CORE-SW1 | HQ-ACC-SW2 | Copper straight | Uplink |
-| 4 | HQ-CORE-SW2 | HQ-ACC-SW1 | Copper straight | Redundant uplink |
-| 5 | HQ-CORE-SW2 | HQ-ACC-SW2 | Copper straight | Redundant uplink |
-| 6 | HQ-CORE-SW1 | HQ-FW1 (inside) | Copper straight | Core to firewall |
-| 7 | HQ-FW1 (outside) | ISP-RTR | Copper straight | Internet link |
-| 8 | HQ-FW1 (DMZ) | DMZ-SW1 | Copper straight | DMZ zone |
-| 9 | ISP-RTR | BR-RTR1 | Copper straight | Branch WAN |
-| 10 | BR-RTR1 | BR-SW1 | Copper straight | Branch LAN |
-| 11 | Endpoints | Their switches | Copper straight | PCs on access, WEB-SRV1 on DMZ-SW1, AAA-SRV1 on HQ-CORE-SW2, BR-PC1 on BR-SW1 |
+Use VLAN 999 as the native VLAN on trunks and VLAN 998 for unused access ports. Trunks should carry only required VLANs. The two core links form one LACP EtherChannel; STP stays enabled. Port numbers above are a planned map, not yet verified against selected models.
 
-## Port Record Table
+## Logical topology
 
-| Link | Device A | Port A | Device B | Port B |
-|------|----------|--------|----------|--------|
-| 1 | HQ-CORE-SW1 | Gi1/0/23 | HQ-CORE-SW2 | Gi1/0/23 |
-| 2 | HQ-CORE-SW1 | Gi1/0/24 | HQ-CORE-SW2 | Gi1/0/24 |
-| 3 | HQ-CORE-SW1 | Gi1/0/1 | HQ-ACC-SW1 | Gi1/0/1 |
-| 4 | HQ-CORE-SW1 | Gi1/0/2 | HQ-ACC-SW2 | Gi1/0/1 |
-| 5 | HQ-CORE-SW2 | Gi1/0/1 | HQ-ACC-SW1 | Gi1/0/2 |
-| 6 | HQ-CORE-SW2 | Gi1/0/2 | HQ-ACC-SW2 | Gi1/0/2 |
-| 7 | HQ-CORE-SW1 | Gi1/0/10 | HQ-FW1 | inside |
-| 8 | HQ-FW1 | outside | ISP-RTR | Gi0/0 |
-| 9 | HQ-FW1 | DMZ | DMZ-SW1 | Gi1/0/1 |
-| 10 | ISP-RTR | Gi0/1 | BR-RTR1 | Gi0/0 |
-| 11 | BR-RTR1 | Gi0/1 | BR-SW1 | Gi1/0/1 |
-| 12 | BR-SW1 | Gi1/0/2 | BR-PC1 | NIC |
-| 13 | HQ-ACC-SW1 | access port | PC-STAFF1 | NIC |
-| 14 | HQ-ACC-SW2 | access port | PC-ADMIN1 | NIC |
-| 15 | HQ-CORE-SW2 | access port | AAA-SRV1 | NIC |
-| 16 | DMZ-SW1 | access port | WEB-SRV1 | NIC |
-
-## Logical Topology (Mermaid)
-
-```mermaid
+~~~mermaid
 flowchart TB
-  subgraph INET["Internet (untrusted)"]
-    ISP[ISP-RTR]
+  ISP["ISP-RTR: .1 and .5 WAN addresses"]
+  subgraph HQ["Headquarters"]
+    FW["HQ-FW1: outside .2; inside 10.10.1.254; DMZ 10.10.50.1"]
+    C1["HQ-CORE-SW1: SVI .2; preferred HSRP active"]
+    C2["HQ-CORE-SW2: SVI .3; HSRP standby"]
+    A1["HQ-ACC-SW1"]
+    A2["HQ-ACC-SW2"]
+    DSW["DMZ-SW1: 10.10.50.2"]
+    WEB["WEB-SRV1: 10.10.50.20"]
+    AAA["AAA-SRV1: 10.10.30.10"]
+    C1 ===|"2-link LACP EtherChannel; VLAN 901"| C2
+    C1 ---|"Trunk"| A1
+    C1 ---|"Trunk"| A2
+    C2 ---|"Trunk"| A1
+    C2 ---|"Trunk"| A2
+    C1 ---|"VLAN 901 transit"| FW
+    FW --- DSW --- WEB
+    C2 ---|"VLAN 30"| AAA
   end
-
-  subgraph DMZ["DMZ 172.16.60.0/24"]
-    DSW[DMZ-SW1] --- WEB[WEB-SRV1]
+  subgraph BRANCH["Branch"]
+    BRR["BR-RTR1: WAN 203.0.113.6; subinterfaces .1 gateways"]
+    BSW["BR-SW1: VLAN 110 management .2"]
+    BPC["BR-PC1: VLAN 120, 10.20.20.10"]
+    BRR ---|"802.1Q trunk VLANs 110–140"| BSW
+    BSW --- BPC
   end
+  ISP ---|"203.0.113.0/30"| FW
+  ISP ---|"203.0.113.4/30"| BRR
+  FW -. "Planned IPsec VPN" .- BRR
+~~~
 
-  subgraph HQ["HQ Internal"]
-    C1[HQ-CORE-SW1] === C2[HQ-CORE-SW2]
-    A1[HQ-ACC-SW1]
-    A2[HQ-ACC-SW2]
-    C1 --- A1
-    C1 --- A2
-    C2 --- A1
-    C2 --- A2
-    C2 --- AAA[AAA-SRV1]
-    A1 --- P1["PC-STAFF1 (VLAN 10)<br/>PC-FIN1 (VLAN 20)"]
-    A2 --- P2["PC-ADMIN1 (VLAN 30)<br/>PC-GUEST1 (VLAN 40)"]
-  end
+## Routing and security intent
 
-  subgraph BR["Branch 10.20.0.0/16"]
-    BRR[BR-RTR1] --- BSW[BR-SW1] --- BPC[BR-PC1]
-  end
+- HQ cores route HQ VLANs and use HQ-FW1 10.10.1.254 as the default-route next hop.
+- HQ-FW1 routes internal HQ subnets through transit HSRP VIP 10.10.1.1; DMZ is directly connected.
+- ISP-RTR routes between the two separate documentation-only WAN links.
+- Guest VLAN 40 is denied access to HQ internal networks; only explicitly approved external services are allowed.
+- VLAN 10 is the approved network-device administration source.
+- DMZ-to-internal access is denied by default. Outside access to WEB-SRV1 is limited to explicitly published web ports.
+- Branch VLANs are separated with router ACLs. Branch-to-HQ application traffic is allowed only by explicit policy and should use IPsec when implemented.
 
-  FW[HQ-FW1]
-  ISP --- FW
-  FW --- DSW
-  FW --- C1
-  ISP --- BRR
-  FW -. "IPsec VPN" .- BRR
-```
+## Availability limitations
 
-## Suggested Cisco Device Names and Roles
+Dual HQ cores and dual-homed access switches provide planned switching redundancy. The single HQ-FW1-to-CORE-SW1 physical link and the single firewall remain failure points. Do not describe the topology as fully redundant end-to-end.
 
-- HQ-CORE-SW1: primary distribution/core switch for HQ LAN
-- HQ-CORE-SW2: redundant core switch for HA and resilience
-- HQ-ACC-SW1: access switch for HQ user VLANs
-- HQ-ACC-SW2: backup access switch for high availability
-- HQ-FW1: Cisco firewall or security appliance for segmentation and Internet edge
-- DMZ-SW1: DMZ switch for public services
-- ISP-RTR: upstream provider router
-- BR-RTR1: branch WAN router and default gateway
-- BR-SW1: branch access distribution switch
-- WEB-SRV1: DMZ web server
-- AAA-SRV1: authentication, authorization, and accounting server
-- BR-PC1: example branch user workstation
+## Build order
 
-## Design Rationale
-
-### 1. Redundant Core Switches (Availability)
-The HQ network uses two core switches (HQ-CORE-SW1 and HQ-CORE-SW2), and every access switch has an uplink to both. If one core switch fails or goes offline, traffic continues through the other, supporting the Availability pillar of the CIA triad. Spanning Tree Protocol (STP) prevents loops across the redundant paths, and HSRP provides a default gateway that survives a core failure.
-
-### 2. Web Server in the DMZ (Containment / Assume Breach)
-The web server must accept connections from the public Internet, which makes it the most exposed system in the network and the most likely to be attacked. Placing it on the internal network would mean a single compromise gives an attacker a foothold next to sensitive systems. Instead, WEB-SRV1 sits in an isolated DMZ behind the firewall. Firewall policy allows Internet-to-DMZ traffic only on required ports (HTTP/HTTPS), blocks DMZ-to-internal traffic, and blocks Internet-to-internal traffic. If the web server is compromised, the attack is contained within the DMZ and the internal network stays protected.
-
-### 3. Guest and Finance Segmentation (Least Privilege / Limiting Lateral Movement)
-Guest users are untrusted devices. The Guest VLAN (40) is segmented from the Finance VLAN (20) so that a compromised guest device cannot move laterally into sensitive systems. VLANs separate the networks, and ACLs on the Layer 3 core enforce the boundary: Guest traffic is permitted to reach the Internet only and is denied access to all internal VLANs. This follows the principle of least privilege and limits the blast radius of any guest-side compromise.
-
-## Security Controls
-
-- ACLs on interfaces
-- Zone-based firewall policies
-- VLAN segmentation
-- SSH and secure management access
-- Logging to central monitoring
-
-## Future Considerations
-
-- SD-WAN or dual WAN connectivity
-- 802.1X for endpoint access
-- IDS/IPS deployment
-- Multi-factor authentication for admins
+1. Select device models and verify their interface names/features.
+2. Place devices, cable them, and label them.
+3. Create VLANs, trunks, native VLAN 999, parking VLAN 998, EtherChannel, and STP.
+4. Configure HQ core SVIs/HSRP and VLAN 901 transit.
+5. Configure firewall interfaces, routes, NAT, and DMZ policy.
+6. Configure branch subinterfaces, branch switch management, and ISP routing.
+7. Configure IPsec, ACLs, SSH, and AAA where supported.
+8. Execute and document the tests in testing/test-results.md.

@@ -1,0 +1,9 @@
+# HQ Configuration
+
+This folder contains configuration examples for Headquarters network devices.
+
+Recommended files:
+- `hq-core-switch.txt`
+- `hq-router.txt`
+- `hq-firewall.txt`
+- `hq-vlan-plan.txt`

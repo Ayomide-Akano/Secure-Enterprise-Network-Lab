@@ -40,33 +40,55 @@ Build a segmented HQ and branch network with Layer-3 HQ cores, HSRP, dual-homed 
 
 HQ HSRP uses .1 as the virtual gateway, CORE-SW1 .2, and CORE-SW2 .3 for VLANs 10, 20, 30, 40, 50, and 99. VLAN 60 has no core SVI. VLAN 999 has no IP address or SVI.
 
-## Physical cable and port map
+## Port Record
 
-Port names below are proposed labels. Confirm them against the selected Packet Tracer device models before building and update the diagram if necessary.
+The following records define the 18 physical cables for the Packet Tracer build. Use the listed ports where available; if a selected model does not expose a listed interface, use the nearest suitable interface and record the actual port used. The diagram and this record must be kept in sync with any substitutions.
 
-| # | From | To | Link purpose |
-|---:|---|---|---|
-| 1 | HQ-CORE-SW1 Gi1/0/23 | HQ-CORE-SW2 Gi1/0/23 | LACP member 1; trunk VLANs 10,20,30,40,50,99,999; native 999 |
-| 2 | HQ-CORE-SW1 Gi1/0/24 | HQ-CORE-SW2 Gi1/0/24 | LACP member 2; same Port-channel trunk policy |
-| 3 | HQ-CORE-SW1 Gi1/0/1 | HQ-ACC-SW1 Gi1/0/1 | Trunk VLANs 10,20,30,40,50,99,999; native 999 |
-| 4 | HQ-CORE-SW1 Gi1/0/2 | HQ-ACC-SW2 Gi1/0/1 | Trunk VLANs 10,20,30,40,50,99; native 999 |
-| 5 | HQ-CORE-SW2 Gi1/0/1 | HQ-ACC-SW1 Gi1/0/2 | Redundant trunk; same allowed VLANs/native VLAN |
-| 6 | HQ-CORE-SW2 Gi1/0/2 | HQ-ACC-SW2 Gi1/0/2 | Redundant trunk; same allowed VLANs/native VLAN |
-| 7 | HQ-CORE-SW1 routed port Gi1/0/10 | HQ-FW1 inside | Routed /30 link; 10.10.254.1/30 to 10.10.254.2/30 |
-| 8 | HQ-FW1 outside | ISP-RTR HQ-facing port | 203.0.113.2/30 to 203.0.113.1/30 |
-| 9 | HQ-FW1 DMZ interface | DMZ-SW1 access port | Access VLAN 60; DMZ subnet 172.16.60.0/24 |
-| 10 | DMZ-SW1 management-only access port | HQ-CORE-SW1 access port | Access VLAN 99 only; do not carry VLAN 60 on this link |
-| 11 | ISP-RTR branch-facing port | BR-RTR1 WAN | 198.51.100.1/30 to 198.51.100.2/30 |
-| 12 | BR-RTR1 Gi0/1 | BR-SW1 Gi1/0/1 | Trunk VLANs 10,99; native 999 |
-| 13 | BR-SW1 Gi1/0/2 | BR-PC1 NIC | Access VLAN 10 |
-| 14 | HQ-ACC-SW1 access port | PC-STAFF1 NIC | Access VLAN 10 |
-| 15 | HQ-ACC-SW1 access port | PC-FIN1 NIC | Access VLAN 20 |
-| 16 | HQ-ACC-SW2 access port | PC-ADMIN1 NIC | Access VLAN 30 |
-| 17 | HQ-ACC-SW2 access port | PC-GUEST1 NIC | Access VLAN 40 |
-| 18 | HQ-CORE-SW2 access port | AAA-SRV1 NIC | Access VLAN 50 |
-| 19 | DMZ-SW1 access port | WEB-SRV1 NIC | Access VLAN 60 |
+### HQ core and access layer
 
-Use copper straight-through Ethernet for unlike Ethernet endpoints unless the chosen Packet Tracer device auto-MDIX/cabling guidance says otherwise. VLAN 999 is the native VLAN on trunks and the parking VLAN for unused access ports; administratively shut down unused ports. No user-facing trunk should carry VLAN 60. The DMZ-SW1 management connection carries only VLAN 99, so the DMZ subnet remains isolated from the HQ core.
+| # | From | Port | To | Port |
+|---:|---|---|---|---|
+| 1 | HQ-CORE-SW1 | Gi1/0/23 | HQ-CORE-SW2 | Gi1/0/23 |
+| 2 | HQ-CORE-SW1 | Gi1/0/24 | HQ-CORE-SW2 | Gi1/0/24 |
+| 3 | HQ-CORE-SW1 | Gi1/0/1 | HQ-ACC-SW1 | Gi0/1 |
+| 4 | HQ-CORE-SW1 | Gi1/0/2 | HQ-ACC-SW2 | Gi0/1 |
+| 5 | HQ-CORE-SW2 | Gi1/0/1 | HQ-ACC-SW1 | Gi0/2 |
+| 6 | HQ-CORE-SW2 | Gi1/0/2 | HQ-ACC-SW2 | Gi0/2 |
+
+The two core-to-core links are intended to form one LACP EtherChannel. The four access uplinks give each access switch a path to both cores, subject to correct EtherChannel, trunking, and spanning-tree configuration.
+
+### Edge and DMZ
+
+| # | From | Port | To | Port |
+|---:|---|---|---|---|
+| 7 | HQ-CORE-SW1 | Gi1/0/10 | HQ-FW1 | Gi1/2 (inside) |
+| 8 | HQ-FW1 | Gi1/1 (outside) | ISP-RTR | Gi0/0 |
+| 9 | HQ-FW1 | Gi1/3 (DMZ) | DMZ-SW1 | Fa0/1 |
+| 10 | WEB-SRV1 | Fa0 | DMZ-SW1 | Fa0/2 |
+
+The firewall's inside, outside, and DMZ interfaces represent separate security zones. Apply firewall policy between zones; do not bridge the DMZ into the internal HQ VLANs.
+
+### Branch
+
+| # | From | Port | To | Port |
+|---:|---|---|---|---|
+| 11 | ISP-RTR | Gi0/1 | BR-RTR1 | Gi0/0 |
+| 12 | BR-RTR1 | Gi0/1 | BR-SW1 | Gi0/1 |
+| 13 | BR-PC1 | Fa0 | BR-SW1 | Fa0/1 |
+
+### Endpoints at HQ
+
+| # | From | Port | To | Port |
+|---:|---|---|---|---|
+| 14 | PC-STAFF1 | Fa0 | HQ-ACC-SW1 | Fa0/1 |
+| 15 | PC-FIN1 | Fa0 | HQ-ACC-SW1 | Fa0/2 |
+| 16 | PC-ADMIN1 | Fa0 | HQ-ACC-SW2 | Fa0/1 |
+| 17 | PC-GUEST1 | Fa0 | HQ-ACC-SW2 | Fa0/2 |
+| 18 | AAA-SRV1 | Fa0 | HQ-CORE-SW2 | Gi1/0/10 |
+
+Use copper straight-through Ethernet for these links unless the selected Packet Tracer model or cabling guidance requires otherwise. Configure HQ trunk links to allow VLANs 10,20,30,40,50,99,999 with native VLAN 999; VLAN 60 must not be carried on HQ core/access trunks. The branch router-to-switch trunk allows VLANs 10,99,999 with native VLAN 999. Park unused switch ports in VLAN 999 and administratively shut them down.
+
+**Management-link note:** This 18-cable record follows the supplied port list, which does not include a separate VLAN 99 management cable for DMZ-SW1. Its documented management SVI (10.10.99.12) will not be reachable until a separate management-only VLAN 99 connection is added and recorded, or the design is explicitly revised to use another supported management path. Do not trunk VLAN 60 to the HQ core for management.
 
 ## Logical topology
 

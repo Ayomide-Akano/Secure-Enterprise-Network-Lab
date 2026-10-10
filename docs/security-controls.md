@@ -38,7 +38,7 @@
 
 - Use SSH, not Telnet, for device administration.
 - Only HQ IT-ADMIN VLAN 30 may initiate management access to HQ management VLAN 99. Branch management access must be explicitly controlled and must not be implicitly allowed from branch STAFF.
-- Set native VLAN 999 on trunks and explicitly restrict each trunk's allowed VLANs. HQ core-to-core and core-to-access trunks carry VLANs 10,20,30,40,50,99; branch router-to-switch trunk carries VLANs 10,99. Do not carry VLAN 60 on HQ core trunks.
+- Set native VLAN 999 on trunks and explicitly restrict each trunk's allowed VLANs. HQ core-to-core and core-to-access trunks allow VLANs 10,20,30,40,50,99,999; branch router-to-switch trunk allows VLANs 10,99,999. VLAN 999 is explicitly included in each trunk's allowed list because it is the native VLAN. Do not carry VLAN 60 on HQ core trunks.
 - Administratively shut down unused access ports and assign them to VLAN 999. VLAN 999 has no IP subnet or SVI.
 - DMZ-SW1's management connection is VLAN 99 only; the firewall-facing DMZ segment is VLAN 60 only. Do not bridge VLAN 60 into the HQ core.
 - Enable port security, DHCP snooping, Dynamic ARP Inspection, and secure STP settings only where the selected Packet Tracer devices support them.

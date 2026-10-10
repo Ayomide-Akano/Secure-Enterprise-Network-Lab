@@ -24,11 +24,11 @@
 | HQ-CORE-SW1 | SVI VLAN 30 | 30 | 10.10.30.2/24 | Host gateway VIP 10.10.30.1 |
 | HQ-CORE-SW1 | SVI VLAN 40 | 40 | 10.10.40.2/24 | Host gateway VIP 10.10.40.1 |
 | HQ-CORE-SW1 | SVI VLAN 901 | 901 | 10.10.1.2/24 | Transit HSRP VIP 10.10.1.1; core default route via firewall 10.10.1.254 |
-| HQ-CORE-SW2 | SVI VLAN 10 | 10 | 10.10.10.3/24 | HSRP 10.10.10.1 |
-| HQ-CORE-SW2 | SVI VLAN 20 | 20 | 10.10.20.3/24 | HSRP 10.10.20.1 |
-| HQ-CORE-SW2 | SVI VLAN 30 | 30 | 10.10.30.3/24 | HSRP 10.10.30.1 |
-| HQ-CORE-SW2 | SVI VLAN 40 | 40 | 10.10.40.3/24 | HSRP 10.10.40.1 |
-| HQ-CORE-SW2 | SVI VLAN 901 | 901 | 10.10.1.3/24 | HSRP 10.10.1.1 |
+| HQ-CORE-SW2 | SVI VLAN 10 | 10 | 10.10.10.3/24 | Host gateway VIP 10.10.10.1 |
+| HQ-CORE-SW2 | SVI VLAN 20 | 20 | 10.10.20.3/24 | Host gateway VIP 10.10.20.1 |
+| HQ-CORE-SW2 | SVI VLAN 30 | 30 | 10.10.30.3/24 | Host gateway VIP 10.10.30.1 |
+| HQ-CORE-SW2 | SVI VLAN 40 | 40 | 10.10.40.3/24 | Host gateway VIP 10.10.40.1 |
+| HQ-CORE-SW2 | SVI VLAN 901 | 901 | 10.10.1.3/24 | Transit HSRP VIP 10.10.1.1; core default route via firewall 10.10.1.254 |
 | HQ-FW1 | Outside | Outside | 203.0.113.2/30 | ISP-RTR 203.0.113.1 |
 | HQ-FW1 | Inside | VLAN 901 transit | 10.10.1.254/24 | HQ transit |
 | HQ-FW1 | DMZ | VLAN 50 | 10.10.50.1/24 | DMZ gateway |

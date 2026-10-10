@@ -13,7 +13,7 @@ For each test, record date/time, Packet Tracer version/file, devices/interfaces,
 | DES-01 | VLAN IDs/names across baseline, IP plan, design, diagram | Exact match | Pending |
 | DES-02 | Subnets, masks, gateways, interface IPs | No overlap; gateway ownership matches routing model | Pending |
 | DES-03 | Cable endpoints and port names | Each link matches the port map and selected device models | Pending |
-| DES-04 | Trunk/native VLAN plan | Native VLAN 999; only required VLANs carried | Pending |
+| DES-04 | Trunk/native VLAN plan | Core-to-core allows 10,20,30,40,901; HQ access trunks 10,20,30,40; branch trunk 110,120,130,140; native 999; VLAN 50 excluded from core trunks | Pending |
 | DES-05 | Device inventory/endpoints | Every diagram device appears in inventory and every endpoint has a VLAN/zone | Pending |
 | DES-06 | DMZ architecture | VLAN 50 is behind HQ-FW1; no core SVI for VLAN 50 | Pending |
 | DES-07 | Branch routing model | BR-RTR1 subinterfaces are gateways; BR-SW1 only has VLAN 110 management SVI | Pending |

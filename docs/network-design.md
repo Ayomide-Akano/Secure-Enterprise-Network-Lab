@@ -99,23 +99,38 @@ Design a secure enterprise network connecting a Headquarters (HQ) and a Branch o
 ## Logical Topology (Mermaid)
 
 ```mermaid
-flowchart LR
-    Internet[Internet] --> ISP[ISP-RTR]
-    ISP --> FW[HQ-FW1]
-    FW --> CORE[HQ-CORE-SW1]
-    CORE --> ACC1[HQ-ACC-SW1]
-    CORE --> ACC2[HQ-ACC-SW2]
-    CORE --> AAA[AAA-SRV1]
-    FW --> DMZ[DMZ-SW1]
-    DMZ --> WEB[WEB-SRV1]
+flowchart TB
+  subgraph INET["Internet (untrusted)"]
+    ISP[ISP-RTR]
+  end
 
-    CORE --> USER1[USER-PCs]
-    ACC1 --> USER2[USER-PCs]
-    ACC2 --> USER3[USER-PCs]
+  subgraph DMZ["DMZ 172.16.60.0/24"]
+    DSW[DMZ-SW1] --- WEB[WEB-SRV1]
+  end
 
-    ISP --> BRRTR[BR-RTR1]
-    BRRTR --> BRSW[BR-SW1]
-    BRSW --> BRPC[BR-PC1]
+  subgraph HQ["HQ Internal"]
+    C1[HQ-CORE-SW1] === C2[HQ-CORE-SW2]
+    A1[HQ-ACC-SW1]
+    A2[HQ-ACC-SW2]
+    C1 --- A1
+    C1 --- A2
+    C2 --- A1
+    C2 --- A2
+    C2 --- AAA[AAA-SRV1]
+    A1 --- P1["PC-STAFF1 (VLAN 10)<br/>PC-FIN1 (VLAN 20)"]
+    A2 --- P2["PC-ADMIN1 (VLAN 30)<br/>PC-GUEST1 (VLAN 40)"]
+  end
+
+  subgraph BR["Branch 10.20.0.0/16"]
+    BRR[BR-RTR1] --- BSW[BR-SW1] --- BPC[BR-PC1]
+  end
+
+  FW[HQ-FW1]
+  ISP --- FW
+  FW --- DSW
+  FW --- C1
+  ISP --- BRR
+  FW -. "IPsec VPN" .- BRR
 ```
 
 ## Suggested Cisco Device Names and Roles

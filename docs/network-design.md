@@ -40,7 +40,7 @@ PC-FIN1 is in HQ users VLAN 20; this baseline has no separate Finance VLAN. PC-A
 | Branch | 110 | BR-MGMT | 10.20.10.0/24 | 10.20.10.1 BR-RTR1 |
 | Branch | 120 | BR-USERS | 10.20.20.0/24 | 10.20.20.1 BR-RTR1 |
 | Branch | 130 | BR-SERVICES | 10.20.30.0/24 | 10.20.30.1 BR-RTR1 |
-| Branch | 140 | BR-GUEST | 10.20.40.0/24 | 10.20.40.1 BR-RTR1 |
+| Branch | 140 | BR-GUEST | 10.20.40.0/24 | 10.20.40.1 BR-RTR1 |\n| Branch | 999 | NATIVE-UNUSED | No IP | None |\n| Branch | 998 | PARKING-UNUSED | No IP | None |
 
 HQ HSRP runs on VLANs 10, 20, 30, 40, and 901. VLAN 50 is behind HQ-FW1 and has no HQ core SVI. BR-RTR1 subinterfaces provide the branch VLAN gateways; BR-SW1 routes none of the user VLANs.
 
@@ -60,7 +60,7 @@ These are planned interface labels; confirm the selected Packet Tracer device mo
 | 8 | HQ-FW1 outside | ISP-RTR Gi0/0 | Copper straight-through; HQ WAN |
 | 9 | HQ-FW1 DMZ | DMZ-SW1 Gi1/0/1 | Copper straight-through; isolated VLAN 50 segment |
 | 10 | ISP-RTR Gi0/1 | BR-RTR1 Gi0/0 | Copper straight-through; branch WAN |
-| 11 | BR-RTR1 Gi0/1 | BR-SW1 Gi1/0/1 | Copper straight-through; 802.1Q trunk for VLANs 110–140 |
+| 11 | BR-RTR1 Gi0/1 | BR-SW1 Gi1/0/1 | Copper straight-through; trunk VLANs 110, 120, 130, 140; native 999 |
 | 12 | BR-SW1 Gi1/0/2 | BR-PC1 NIC | Copper straight-through; access VLAN 120 |
 | 13 | HQ-ACC-SW1 access port | PC-STAFF1 NIC | Copper straight-through; access VLAN 20 |
 | 14 | HQ-ACC-SW1 access port | PC-FIN1 NIC | Copper straight-through; access VLAN 20 |
@@ -69,7 +69,7 @@ These are planned interface labels; confirm the selected Packet Tracer device mo
 | 17 | HQ-CORE-SW2 access port | AAA-SRV1 NIC | Copper straight-through; access VLAN 30 |
 | 18 | DMZ-SW1 access port | WEB-SRV1 NIC | Copper straight-through; access VLAN 50 |
 
-Use VLAN 999 as the native VLAN on trunks and VLAN 998 for unused access ports. Trunks should carry only required VLANs. The two core links form one LACP EtherChannel; STP stays enabled. Port numbers above are a planned map, not yet verified against selected models.
+Use VLAN 999 as the native VLAN on trunks and VLAN 998 for unused access ports. Trunks should carry only required VLANs. The core Port-channel carries VLANs 10, 20, 30, 40, and 901 with native VLAN 999; it excludes VLAN 50. Core-to-access trunks carry only VLANs 10, 20, 30, and 40. The branch trunk carries VLANs 110, 120, 130, and 140. VLAN 999 is native and VLAN 998 is the unused-port parking VLAN at both sites; neither has an SVI/IP. The two core links form one LACP EtherChannel; STP stays enabled. Port numbers above are a planned map, not yet verified against selected models.
 
 ## Logical topology
 
@@ -85,7 +85,7 @@ flowchart TB
     DSW["DMZ-SW1: 10.10.50.2"]
     WEB["WEB-SRV1: 10.10.50.20"]
     AAA["AAA-SRV1: 10.10.30.10"]
-    C1 ===|"2-link LACP EtherChannel; VLAN 901"| C2
+    C1 ===|"2-link LACP EtherChannel; VLANs 10, 20, 30, 40, 901; native 999"| C2
     C1 ---|"Trunk"| A1
     C1 ---|"Trunk"| A2
     C2 ---|"Trunk"| A1

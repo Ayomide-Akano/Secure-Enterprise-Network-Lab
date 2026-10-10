@@ -32,7 +32,8 @@ This is the single source of truth for design decisions. If another file disagre
 | Branch | 120 | BR-USERS | 10.20.20.0/24 | 10.20.20.1 | BR-RTR1 subinterface |
 | Branch | 130 | BR-SERVICES | 10.20.30.0/24 | 10.20.30.1 | BR-RTR1 subinterface |
 | Branch | 140 | BR-GUEST | 10.20.40.0/24 | 10.20.40.1 | BR-RTR1 subinterface |
-| Branch | 999 | NATIVE-UNUSED | No IP subnet | None | No SVI; native VLAN on branch trunk |\n| Branch | 998 | PARKING-UNUSED | No IP subnet | None | No SVI; unused branch access ports |
+| Branch | 999 | NATIVE-UNUSED | No IP subnet | None | No SVI; native VLAN on branch trunk |
+| Branch | 998 | PARKING-UNUSED | No IP subnet | None | No SVI; unused branch access ports |
 
 ## Addressing rules
 

@@ -2,7 +2,7 @@
 
 ## Overview
 
-This lab uses a structured, scalable addressing plan for HQ and Branch segments. A key design principle is **standardization**: all VLAN gateways use **.1**, primary core switch uses **.2**, and secondary core switch uses **.3**. This eliminates confusion and aligns with enterprise best practices for rapid troubleshooting and network management.
+This lab uses a structured, scalable addressing plan for HQ and Branch segments. A key design principle is **standardization**: all VLAN gateways use **.1**, primary core switch uses **.2**, and secondary core switch uses **.3**. This eliminates confusion and aligns with enterprise best practices.
 
 ## Addressing Standard (Enterprise Best Practice)
 
@@ -56,6 +56,15 @@ This lab uses a structured, scalable addressing plan for HQ and Branch segments.
 - **Standby**: HQ-CORE-SW2 (secondary)
 - **Virtual IP (.1)**: Acts as default gateway for all end devices
 - **Priority**: Configure HQ-CORE-SW1 with higher HSRP priority to maintain active role under normal conditions
+
+### Point-to-Point Link: 10.10.0.0/30
+
+| Address | Role |
+|---------|------|
+| 10.10.0.0 | Network address (not usable) |
+| 10.10.0.1 | HQ-FW1 inside interface |
+| 10.10.0.2 | CORE-SW1 routed port |
+| 10.10.0.3 | Broadcast address (not usable) |
 
 ---
 

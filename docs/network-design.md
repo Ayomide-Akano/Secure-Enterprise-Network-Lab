@@ -46,9 +46,9 @@ Port names below are proposed labels. Confirm them against the selected Packet T
 
 | # | From | To | Link purpose |
 |---:|---|---|---|
-| 1 | HQ-CORE-SW1 Gi1/0/23 | HQ-CORE-SW2 Gi1/0/23 | LACP member 1; trunk VLANs 10,20,30,40,50,99; native 999 |
+| 1 | HQ-CORE-SW1 Gi1/0/23 | HQ-CORE-SW2 Gi1/0/23 | LACP member 1; trunk VLANs 10,20,30,40,50,99,999; native 999 |
 | 2 | HQ-CORE-SW1 Gi1/0/24 | HQ-CORE-SW2 Gi1/0/24 | LACP member 2; same Port-channel trunk policy |
-| 3 | HQ-CORE-SW1 Gi1/0/1 | HQ-ACC-SW1 Gi1/0/1 | Trunk VLANs 10,20,30,40,50,99; native 999 |
+| 3 | HQ-CORE-SW1 Gi1/0/1 | HQ-ACC-SW1 Gi1/0/1 | Trunk VLANs 10,20,30,40,50,99,999; native 999 |
 | 4 | HQ-CORE-SW1 Gi1/0/2 | HQ-ACC-SW2 Gi1/0/1 | Trunk VLANs 10,20,30,40,50,99; native 999 |
 | 5 | HQ-CORE-SW2 Gi1/0/1 | HQ-ACC-SW1 Gi1/0/2 | Redundant trunk; same allowed VLANs/native VLAN |
 | 6 | HQ-CORE-SW2 Gi1/0/2 | HQ-ACC-SW2 Gi1/0/2 | Redundant trunk; same allowed VLANs/native VLAN |
@@ -97,7 +97,7 @@ flowchart TB
     BRR["BR-RTR1: WAN 198.51.100.2; VLAN 10/99 subinterfaces"]
     BSW["BR-SW1: management 10.20.99.2"]
     BPC["BR-PC1: VLAN 10, 10.20.10.10"]
-    BRR ---|"802.1Q trunk VLANs 10,99; native 999"| BSW
+    BRR ---|"802.1Q trunk VLANs 10,99,999; native 999"| BSW
     BSW --- BPC
   end
   ISP ---|"203.0.113.0/30"| FW

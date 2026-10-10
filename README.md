@@ -1,70 +1,56 @@
 # Secure Enterprise Network Lab — HQ + Branch
 
-A Cisco Packet Tracer-oriented enterprise network design project focused on segmented HQ and branch connectivity, routing, perimeter security, and repeatable validation.
+A Cisco Packet Tracer enterprise-network design project. The goal is a consistent, documented architecture before the lab is built.
 
-> **Current state:** Design documentation exists, but the repository audit has identified conflicting addressing decisions, missing device configurations, and a placeholder rather than a valid Packet Tracer project. The network must not be described as implemented or validated yet.
+**Current state:** The documentation baseline is being reconciled on the audit branch. The Packet Tracer simulation has not yet been built. No connectivity, security, VPN, or failover tests are claimed as passed.
 
-## Project objectives
+## Source of truth
 
-- Design a segmented HQ and branch network.
-- Document VLANs, subnets, gateways, routed links, device roles, and physical connectivity.
-- Define least-privilege security boundaries between users, management, servers, guests, and DMZ services.
-- Build matching device configurations and a real Packet Tracer topology.
-- Validate reachability, prohibited traffic, redundancy, and security controls with recorded evidence.
+Start with [Canonical Design Baseline](docs/design-baseline.md). Keep the detailed [IP Addressing Plan](docs/ip-addressing.md), [Network Design and Cable Map](docs/network-design.md), [Security Policy Matrix](docs/security-controls.md), editable diagram, device configurations, and tests aligned with that baseline.
 
-## Repository layout
+## Architecture at a glance
 
-| Path | Purpose | Current status |
+- HQ Layer-3 core pair with HSRP for VLANs 10, 20, 30, 40, and 901.
+- Two HQ access switches dual-homed to both cores; the two core-to-core links are one LACP EtherChannel.
+- HQ firewall with outside, inside/transit, and DMZ interfaces.
+- DMZ VLAN 50 is behind the firewall; no HQ core SVI exists for VLAN 50.
+- Branch router-on-a-stick provides gateways for VLANs 110, 120, 130, and 140.
+- Planned site-to-site IPsec VPN between HQ-FW1 and BR-RTR1.
+- VLAN 999 is native/unused; VLAN 998 is the unused-port parking VLAN. Neither has an IP address.
+
+The single physical firewall-to-CORE-SW1 link is a known single point of failure. The project must not claim full end-to-end redundancy unless this is redesigned and tested.
+
+## Repository map
+
+| Path | Purpose | State |
 |---|---|---|
-| `docs/network-design.md` | Architecture, inventory, VLANs, physical/logical topology | Draft; addressing conflicts need resolution |
-| `docs/ip-addressing.md` | IP plan and interface assignments | Draft; conflicts need resolution |
-| `docs/security-controls.md` | Security objectives and recommended controls | Guidance only; not implementation evidence |
-| `docs/repository-audit.md` | Findings and remediation order from the repository review | Initial audit available |
-| `diagrams/hq-branch-topology.drawio` | Editable Draw.io topology | Needs alignment with the canonical plan |
-| `diagrams/hq-branch-topology.drawio.png` | Exported topology preview | Needs regeneration after diagram correction |
-| `configs/hq/` | HQ device configurations | Not yet populated with configurations |
-| `configs/branch/` | Branch device configurations | Not yet populated with configurations |
-| `packet-tracer/` | Cisco Packet Tracer project | A real `.pkt` file is still required |
-| `testing/test-results.md` | Test plan and results | Planned checks only; no completed evidence recorded |
+| docs/design-baseline.md | Canonical architecture/addressing decisions | Working baseline |
+| docs/ip-addressing.md | Detailed IP/interface register | Must match baseline |
+| docs/network-design.md | Device roles, VLANs, cabling, topology | Must match baseline |
+| docs/security-controls.md | Planned zone policy and control mapping | Design only |
+| docs/repository-audit.md | Audit findings and remediation record | Audit log |
+| diagrams/hq-branch-topology.drawio | Editable design diagram | Updated to canonical baseline |
+| diagrams/hq-branch-topology.drawio.png | Exported preview | Removed while stale; regenerate after visual review |
+| configs/hq/README.md | Planned HQ configuration inventory | No device configs yet |
+| configs/branch/README.md | Planned branch configuration inventory | No device configs yet |
+| packet-tracer/README.md | Packet Tracer build handoff | Real .pkt file not yet created |
+| testing/test-results.md | Static, connectivity, security, and failover test matrix | Tests not run |
 
-## Intended architecture
+## Implementation sequence
 
-The documented target includes a headquarters site and a branch site, HQ core and access switching, a perimeter firewall, an ISP edge, a DMZ web service, an AAA service, and a branch router/access switch. The design proposes VLAN segmentation, controlled inter-VLAN access, secure device management, centralized logging, and a site-to-site VPN.
+1. Confirm the selected Packet Tracer device models and actual interface names.
+2. Place devices and cable exactly as documented; update the port map everywhere if model ports differ.
+3. Configure VLANs, trunks, native/parking VLANs, EtherChannel, and STP.
+4. Configure HQ SVIs/HSRP and transit VLAN 901.
+5. Configure firewall interfaces, routes, NAT, and DMZ policy.
+6. Configure branch subinterfaces and ISP routing.
+7. Configure VPN, ACLs, SSH, and AAA where supported.
+8. Run every applicable test and attach evidence.
+9. Update status only when evidence supports it.
 
-These are **design intentions**, not proof that the controls are configured or operational.
+## Safety and accuracy
 
-## Important implementation status
-
-| Stage | Status |
-|---|---|
-| Initial repository and documentation review | In progress |
-| Canonical addressing/VLAN plan | Blocked by conflicting assignments |
-| Reconciled topology diagram | Pending |
-| HQ and branch device configurations | Pending |
-| Valid Packet Tracer simulation file | Pending |
-| Connectivity and routing tests | Pending |
-| Security negative tests and segmentation validation | Pending |
-| Redundancy/failover tests | Pending |
-| Evidence-backed final documentation | Pending |
-
-## Audit and next steps
-
-Read [the initial repository audit](docs/repository-audit.md). The next priority is to approve one consistent IP/VLAN/interface plan before producing device configurations. This avoids embedding contradictory gateway and subnet assignments in the lab.
-
-Testing must record the action or command, expected result, observed result, pass/fail outcome, and evidence. A planned control must not be marked as passed until it has been tested.
-
-## Lab assumptions and safety
-
-- Documentation-only address ranges (for example, `203.0.113.0/24`) are examples and are not real public allocations for production use.
-- Use unique credentials in the lab; never commit real passwords, shared secrets, VPN keys, or other sensitive credentials.
-- Confirm feature support for the exact Packet Tracer device models before treating a configuration example as executable.
-- This is a learning lab, not a production-ready reference architecture.
-
-## Contribution workflow
-
-1. Reconcile the addressing and VLAN plan.
-2. Update the design document and editable diagram from the same baseline.
-3. Add device-specific configuration examples.
-4. Build and open the actual Packet Tracer project.
-5. Run tests and record evidence.
-6. Update status claims only after verification.
+- 203.0.113.0/24 is documentation-only address space, not a real public allocation.
+- Never commit real passwords, VPN keys, private keys, or other secrets.
+- Confirm feature support for the selected Packet Tracer devices.
+- Distinguish designed, configured, simulated, and verified. A document or diagram does not prove a control works.

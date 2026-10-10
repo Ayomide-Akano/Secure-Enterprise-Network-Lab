@@ -40,7 +40,8 @@ PC-FIN1 is in HQ users VLAN 20; this baseline has no separate Finance VLAN. PC-A
 | Branch | 110 | BR-MGMT | 10.20.10.0/24 | 10.20.10.1 BR-RTR1 |
 | Branch | 120 | BR-USERS | 10.20.20.0/24 | 10.20.20.1 BR-RTR1 |
 | Branch | 130 | BR-SERVICES | 10.20.30.0/24 | 10.20.30.1 BR-RTR1 |
-| Branch | 140 | BR-GUEST | 10.20.40.0/24 | 10.20.40.1 BR-RTR1 |\n| Branch | 999 | NATIVE-UNUSED | No IP | None |\n| Branch | 998 | PARKING-UNUSED | No IP | None |
+| Branch | 140 | BR-GUEST | 10.20.40.0/24 | 10.20.40.1 BR-RTR1 |
+| Branch | 999 | NATIVE-UNUSED | No IP | None |\n| Branch | 998 | PARKING-UNUSED | No IP | None |
 
 HQ HSRP runs on VLANs 10, 20, 30, 40, and 901. VLAN 50 is behind HQ-FW1 and has no HQ core SVI. BR-RTR1 subinterfaces provide the branch VLAN gateways; BR-SW1 routes none of the user VLANs.
 
@@ -50,12 +51,12 @@ These are planned interface labels; confirm the selected Packet Tracer device mo
 
 | # | From | To | Cable/link purpose |
 |---:|---|---|---|
-| 1 | HQ-CORE-SW1 Gi1/0/23 | HQ-CORE-SW2 Gi1/0/23 | Copper straight-through; LACP EtherChannel member 1 |
-| 2 | HQ-CORE-SW1 Gi1/0/24 | HQ-CORE-SW2 Gi1/0/24 | Copper straight-through; LACP EtherChannel member 2 |
-| 3 | HQ-CORE-SW1 Gi1/0/1 | HQ-ACC-SW1 Gi1/0/1 | Copper straight-through; trunk |
-| 4 | HQ-CORE-SW1 Gi1/0/2 | HQ-ACC-SW2 Gi1/0/1 | Copper straight-through; trunk |
-| 5 | HQ-CORE-SW2 Gi1/0/1 | HQ-ACC-SW1 Gi1/0/2 | Copper straight-through; redundant trunk |
-| 6 | HQ-CORE-SW2 Gi1/0/2 | HQ-ACC-SW2 Gi1/0/2 | Copper straight-through; redundant trunk |
+| 1 | HQ-CORE-SW1 Gi1/0/23 | HQ-CORE-SW2 Gi1/0/23 | Copper straight-through; LACP member 1; trunk VLANs 10, 20, 30, 40, 901; native 999 |
+| 2 | HQ-CORE-SW1 Gi1/0/24 | HQ-CORE-SW2 Gi1/0/24 | Copper straight-through; LACP member 2; trunk VLANs 10, 20, 30, 40, 901; native 999 |
+| 3 | HQ-CORE-SW1 Gi1/0/1 | HQ-ACC-SW1 Gi1/0/1 | Copper straight-through; trunk VLANs 10, 20, 30, 40; native 999 |
+| 4 | HQ-CORE-SW1 Gi1/0/2 | HQ-ACC-SW2 Gi1/0/1 | Copper straight-through; trunk VLANs 10, 20, 30, 40; native 999 |
+| 5 | HQ-CORE-SW2 Gi1/0/1 | HQ-ACC-SW1 Gi1/0/2 | Copper straight-through; trunk VLANs 10, 20, 30, 40; native 999 |
+| 6 | HQ-CORE-SW2 Gi1/0/2 | HQ-ACC-SW2 Gi1/0/2 | Copper straight-through; trunk VLANs 10, 20, 30, 40; native 999 |
 | 7 | HQ-CORE-SW1 Gi1/0/10 | HQ-FW1 inside | Copper straight-through; access in transit VLAN 901 |
 | 8 | HQ-FW1 outside | ISP-RTR Gi0/0 | Copper straight-through; HQ WAN |
 | 9 | HQ-FW1 DMZ | DMZ-SW1 Gi1/0/1 | Copper straight-through; isolated VLAN 50 segment |

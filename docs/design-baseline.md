@@ -8,13 +8,13 @@ This is the single source of truth for design decisions. If another file disagre
 
 1. HQ uses two Layer-3 core switches with HSRP for VLANs 10, 20, 30, 40, and 901. CORE-SW1 is preferred active; CORE-SW2 is standby.
 2. HQ access switches are dual-homed to both cores. Two core-to-core Ethernet links form one LACP EtherChannel. STP remains enabled.
-3. HQ-FW1 has outside, inside/transit, and DMZ interfaces. Inside transit uses VLAN 901, subnet 10.10.1.0/24. The firewall physically connects to CORE-SW1; VLAN 901 also crosses the core interconnect. The single physical firewall-to-CORE-SW1 link is a single point of failure; do not claim full end-to-end redundancy.
+3. HQ-FW1 has outside, inside/transit, and DMZ interfaces. Inside transit uses VLAN 901, subnet 10.10.1.0/24. The firewall physically connects to CORE-SW1; the core EtherChannel trunk carries VLANs 10, 20, 30, 40, and 901 (native VLAN 999) so HSRP and transit connectivity span both cores. VLAN 50 is excluded from core trunks. The single physical firewall-to-CORE-SW1 link is a single point of failure; do not claim full end-to-end redundancy.
 4. The DMZ is behind the firewall, not routed by a core SVI. VLAN 50 exists on the DMZ switch segment only. HQ-FW1 is the DMZ gateway.
 5. The branch uses router-on-a-stick. BR-RTR1 subinterfaces are the gateways for VLANs 110, 120, 130, and 140. BR-SW1 has only a management SVI in VLAN 110.
 6. ISP-RTR connects separately to HQ-FW1 and BR-RTR1 using distinct documentation-only public /30 links. Planned IPsec peers are HQ-FW1 outside and BR-RTR1 WAN; VPN operation is unverified until tested.
 7. VLAN 10=HQ management, 20=HQ users (staff and finance endpoints), 30=HQ servers, 40=HQ guest, 50=HQ DMZ, 901=HQ firewall transit, 999=native/unused, 998=unused-port parking. VLANs 999 and 998 have no SVI or IP.
 8. There is no separate Finance VLAN in this baseline. PC-FIN1 belongs to VLAN 20. Do not refer to a Finance VLAN unless a new VLAN is deliberately designed and allocated everywhere.
-9. Use the port map in docs/network-design.md. Port labels must be checked against selected Packet Tracer device models before cabling; update the port map everywhere if a model uses different ports.
+9. Trunk policy: core-to-core Port-channel allows VLANs 10, 20, 30, 40, and 901 with native VLAN 999; HQ core-to-access trunks allow VLANs 10, 20, 30, and 40 with native VLAN 999; branch router-to-switch trunk allows VLANs 110, 120, 130, and 140 with native VLAN 999. VLAN 50 is never carried on HQ core trunks. Use the port map in docs/network-design.md. Port labels must be checked against selected Packet Tracer device models before cabling; update the port map everywhere if a model uses different ports.
 
 ## Canonical VLAN/subnet map
 
@@ -31,7 +31,7 @@ This is the single source of truth for design decisions. If another file disagre
 | Branch | 110 | BR-MGMT | 10.20.10.0/24 | 10.20.10.1 | BR-RTR1 subinterface |
 | Branch | 120 | BR-USERS | 10.20.20.0/24 | 10.20.20.1 | BR-RTR1 subinterface |
 | Branch | 130 | BR-SERVICES | 10.20.30.0/24 | 10.20.30.1 | BR-RTR1 subinterface |
-| Branch | 140 | BR-GUEST | 10.20.40.0/24 | 10.20.40.1 | BR-RTR1 subinterface |
+| Branch | 140 | BR-GUEST | 10.20.40.0/24 | 10.20.40.1 | BR-RTR1 subinterface |\n| Branch | 999 | NATIVE-UNUSED | No IP subnet | None | No SVI; native VLAN on branch trunk |\n| Branch | 998 | PARKING-UNUSED | No IP subnet | None | No SVI; unused branch access ports |
 
 ## Addressing rules
 

@@ -60,7 +60,7 @@ HSRP is planned on VLANs 10, 20, 30, 40, and 901, with CORE-SW1 preferred active
 | BR-PC1 | NIC | 120 | 10.20.20.10/24 | Gateway 10.20.20.1 |
 | BR-RTR1 | Loopback0 | Routed identity | 10.20.255.1/32 | Optional if supported |
 
-BR-RTR1 Gi0/1 to BR-SW1 is a trunk. Do not assign gateway addresses to BR-SW1 in VLANs 120, 130, or 140.
+BR-RTR1 Gi0/1 to BR-SW1 is a trunk allowing VLANs 110, 120, 130, and 140 with native VLAN 999. Create VLANs 999 and 998 on BR-SW1 as native/unused and parking VLANs; neither has an SVI/IP. Do not assign gateway addresses to BR-SW1 in VLANs 120, 130, or 140.
 
 ## WAN addressing
 

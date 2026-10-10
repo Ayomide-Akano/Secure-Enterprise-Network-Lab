@@ -1,0 +1,8 @@
+# Diagrams
+
+This folder is intended for architecture diagrams, topologies, and exported images.
+
+Suggested files:
+- `hq-branch-topology.png`
+- `security-zones.svg`
+- `logical-topology.mmd`

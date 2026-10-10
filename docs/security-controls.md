@@ -17,7 +17,7 @@
 | Branch services | VLAN 130, 10.20.30.0/24 | BR-RTR1 10.20.30.1 |
 | Branch guest | VLAN 140, 10.20.40.0/24 | BR-RTR1 10.20.40.1 |
 
-VLAN 999 is native/unused; VLAN 998 is for unused access ports. Neither has an IP or SVI. PC-FIN1 is in HQ users VLAN 20; no separate Finance VLAN exists.
+VLAN 999 is native/unused and VLAN 998 is for unused access ports at both HQ and the branch. Neither has an IP or SVI. PC-FIN1 is in HQ users VLAN 20; no separate Finance VLAN exists.
 
 ## Policy matrix
 
@@ -39,7 +39,7 @@ VLAN 999 is native/unused; VLAN 998 is for unused access ports. Neither has an I
 - Use SSH, not Telnet, for device administration.
 - Restrict administration to the HQ management subnet and explicitly approved branch management sources.
 - Shut down unused access ports and assign them to VLAN 998.
-- Configure trunks explicitly, use native VLAN 999, and do not place user endpoints in VLAN 1.
+- Configure trunks explicitly with only required allowed VLANs: core-to-core 10,20,30,40,901; HQ core-to-access 10,20,30,40; branch router-to-switch 110,120,130,140. Use native VLAN 999, park unused access ports in VLAN 998, and do not place user endpoints in VLAN 1. Never carry DMZ VLAN 50 on HQ core trunks.
 - Enable port security, DHCP snooping, Dynamic ARP Inspection, and secure STP settings only where supported by selected Packet Tracer models.
 - Configure logging and AAA only when the destination/service is configured and reachable; retain a safe local recovery method.
 - Never commit real credentials, VPN secrets, or private keys.

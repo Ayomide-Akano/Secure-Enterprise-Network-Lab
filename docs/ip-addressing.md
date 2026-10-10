@@ -17,13 +17,13 @@
 
 ## HQ device interfaces
 
-| Device | Interface | VLAN/zone | Address | Gateway/next hop |
+| Device | Interface | VLAN/zone | Address | Host gateway VIP / routing note |
 |---|---|---|---|---|
-| HQ-CORE-SW1 | SVI VLAN 10 | 10 | 10.10.10.2/24 | HSRP 10.10.10.1 |
-| HQ-CORE-SW1 | SVI VLAN 20 | 20 | 10.10.20.2/24 | HSRP 10.10.20.1 |
-| HQ-CORE-SW1 | SVI VLAN 30 | 30 | 10.10.30.2/24 | HSRP 10.10.30.1 |
-| HQ-CORE-SW1 | SVI VLAN 40 | 40 | 10.10.40.2/24 | HSRP 10.10.40.1 |
-| HQ-CORE-SW1 | SVI VLAN 901 | 901 | 10.10.1.2/24 | HSRP 10.10.1.1 |
+| HQ-CORE-SW1 | SVI VLAN 10 | 10 | 10.10.10.2/24 | Host gateway VIP 10.10.10.1 |
+| HQ-CORE-SW1 | SVI VLAN 20 | 20 | 10.10.20.2/24 | Host gateway VIP 10.10.20.1 |
+| HQ-CORE-SW1 | SVI VLAN 30 | 30 | 10.10.30.2/24 | Host gateway VIP 10.10.30.1 |
+| HQ-CORE-SW1 | SVI VLAN 40 | 40 | 10.10.40.2/24 | Host gateway VIP 10.10.40.1 |
+| HQ-CORE-SW1 | SVI VLAN 901 | 901 | 10.10.1.2/24 | Transit HSRP VIP 10.10.1.1; core default route via firewall 10.10.1.254 |
 | HQ-CORE-SW2 | SVI VLAN 10 | 10 | 10.10.10.3/24 | HSRP 10.10.10.1 |
 | HQ-CORE-SW2 | SVI VLAN 20 | 20 | 10.10.20.3/24 | HSRP 10.10.20.1 |
 | HQ-CORE-SW2 | SVI VLAN 30 | 30 | 10.10.30.3/24 | HSRP 10.10.30.1 |

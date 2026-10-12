@@ -4,7 +4,7 @@
 
 ## Objective
 
-Build a segmented HQ and branch network with Layer-3 HQ cores, HSRP, dual-homed access switches, restricted finance and guest segments, a management VLAN, an isolated firewall-controlled DMZ, and a branch router-on-a-stick design.
+Build a segmented HQ and branch network with Layer-3 HQ cores, HSRP, dual-homed access switches, restricted finance and guest segments, a management VLAN, an isolated firewall-controlled DMZ, and a public-facing web service in the DMZ.
 
 ## Device inventory and endpoint assignments
 
@@ -66,7 +66,51 @@ Port names below are proposed labels. Confirm them against the selected Packet T
 | 18 | HQ-CORE-SW2 access port | AAA-SRV1 NIC | Access VLAN 50 |
 | 19 | DMZ-SW1 access port | WEB-SRV1 NIC | Access VLAN 60 |
 
-Use copper straight-through Ethernet for unlike Ethernet endpoints unless the chosen Packet Tracer device auto-MDIX/cabling guidance says otherwise. VLAN 999 is the native VLAN on trunks and the parking VLAN for unused access ports; administratively shut down unused ports. No user-facing trunk should carry VLAN 60. The DMZ-SW1 management connection carries only VLAN 99, so the DMZ subnet remains isolated from the HQ core.
+## Port Record
+
+### HQ core and access layer
+
+| # | From | Port | To | Port |
+|---:|---|---:|---|---:|
+| 1 | HQ-CORE-SW1 | Gi1/0/23 | HQ-CORE-SW2 | Gi1/0/23 |
+| 2 | HQ-CORE-SW1 | Gi1/0/24 | HQ-CORE-SW2 | Gi1/0/24 |
+| 3 | HQ-CORE-SW1 | Gi1/0/1 | HQ-ACC-SW1 | Gi1/0/1 |
+| 4 | HQ-CORE-SW1 | Gi1/0/2 | HQ-ACC-SW2 | Gi1/0/1 |
+| 5 | HQ-CORE-SW2 | Gi1/0/1 | HQ-ACC-SW1 | Gi1/0/2 |
+| 6 | HQ-CORE-SW2 | Gi1/0/2 | HQ-ACC-SW2 | Gi1/0/2 |
+
+Why two cables between the cores, and four down to the access layer? The two core cables will become one EtherChannel. The four uplinks give every access switch a path to both cores, so no single device failure cuts anyone off.
+
+### Edge and DMZ
+
+| # | From | Port | To | Port |
+|---:|---|---:|---|---:|
+| 7 | HQ-CORE-SW1 | Gi1/0/10 | HQ-FW1 | Gi1/2 (inside) |
+| 8 | HQ-FW1 | Gi1/1 (outside) | ISP-RTR | Gi0/0 |
+| 9 | HQ-FW1 | Gi1/3 (DMZ) | DMZ-SW1 | Fa0/1 |
+| 10 | WEB-SRV1 | Fa0 | DMZ-SW1 | Fa0/2 |
+
+Why three separate firewall ports? Each port is a different security zone (inside, outside, DMZ), and the firewall’s rules apply between them.
+
+### Branch
+
+| # | From | Port | To | Port |
+|---:|---|---:|---|---:|
+| 11 | ISP-RTR | Gi0/1 | BR-RTR1 | Gi0/0 |
+| 12 | BR-RTR1 | Gi0/1 | BR-SW1 | Gi1/0/1 |
+| 13 | BR-PC1 | Fa0 | BR-SW1 | Gi1/0/2 |
+
+### Endpoints at HQ
+
+| # | From | Port | To | Port |
+|---:|---|---:|---|---:|
+| 14 | PC-STAFF1 | Fa0 | HQ-ACC-SW1 | Fa0/1 |
+| 15 | PC-FIN1 | Fa0 | HQ-ACC-SW1 | Fa0/2 |
+| 16 | PC-ADMIN1 | Fa0 | HQ-ACC-SW2 | Fa0/1 |
+| 17 | PC-GUEST1 | Fa0 | HQ-ACC-SW2 | Fa0/2 |
+| 18 | AAA-SRV1 | Fa0 | HQ-CORE-SW2 | Gi1/0/10 |
+
+Use this port record as the single source of truth: every configuration and diagram in the project should reference these entries.
 
 ## Logical topology
 

@@ -55,7 +55,7 @@ The VLAN mapping has been standardized. Gateway ownership indicates which device
 | Branch | 99 | MGMT | 10.20.99.0/24 | 10.20.99.1 | BR-RTR1 |
 | Branch | 999 | BLACKHOLE/native | No IP subnet | None | No SVI |
 
-> Note: VLAN 60 (DMZ) uses a different addressing range (172.16.60.0/24) and is owned by the firewall (HQ-FW1). VLANs marked BLACKHOLE/native do not have SVIs and are used as native/native-trunk placeholder.
+> Note: VLAN 60 (DMZ) uses a different addressing range (172.16.60.0/24) and is owned by the firewall (HQ-FW1). VLANs marked BLACKHOLE/native do not have SVIs and are used as native/native-trunk placeholders.
 
 ## IP Allocation per Interface
 
@@ -110,6 +110,48 @@ These are the authoritative SVI and routed-link addresses for the HQ site.
 | BR-SW1 | SVI VLAN 99 | 10.20.99.2/24 | Branch switch management SVI |
 | BR-PC1 | NIC VLAN 10 | 10.20.10.10/24 | Branch staff workstation |
 
-## (rest of the document)
+## Physical Cable Map
 
-The rest of the document (port record, cable map, topology, rationale, security controls) is unchanged.
+| # | From | To | Cable | Purpose |
+|---|------|----|-------|---------|
+| 1 | HQ-CORE-SW1 (2 ports) | HQ-CORE-SW2 (2 ports) | Copper straight (two links) | Core interconnect, later an EtherChannel |
+| 2 | HQ-CORE-SW1 | HQ-ACC-SW1 | Copper straight | Uplink |
+| 3 | HQ-CORE-SW1 | HQ-ACC-SW2 | Copper straight | Uplink |
+| 4 | HQ-CORE-SW2 | HQ-ACC-SW1 | Copper straight | Redundant uplink |
+| 5 | HQ-CORE-SW2 | HQ-ACC-SW2 | Copper straight | Redundant uplink |
+| 6 | HQ-CORE-SW1 | HQ-FW1 (inside) | Copper straight | Core to firewall |
+| 7 | HQ-FW1 (outside) | ISP-RTR | Copper straight | Internet link |
+| 8 | HQ-FW1 (DMZ) | DMZ-SW1 | Copper straight | DMZ zone |
+| 9 | ISP-RTR | BR-RTR1 | Copper straight | Branch WAN |
+| 10 | BR-RTR1 | BR-SW1 | Copper straight | Branch LAN |
+| 11 | Endpoints | Their switches | Copper straight | PCs on access, WEB-SRV1 on DMZ-SW1, AAA-SRV1 on HQ-CORE-SW2, BR-PC1 on BR-SW1 |
+
+## Port Record
+
+### HQ core and access layer
+
+| # | From | Port | To | Port |
+|---:|---|---:|---|---:|
+| 1 | HQ-CORE-SW1 | Gi1/0/23 | HQ-CORE-SW2 | Gi1/0/23 |
+| 2 | HQ-CORE-SW1 | Gi1/0/24 | HQ-CORE-SW2 | Gi1/0/24 |
+| 3 | HQ-CORE-SW1 | Gi1/0/1 | HQ-ACC-SW1 | Gi1/0/1 |
+| 4 | HQ-CORE-SW1 | Gi1/0/2 | HQ-ACC-SW2 | Gi1/0/1 |
+| 5 | HQ-CORE-SW2 | Gi1/0/1 | HQ-ACC-SW1 | Gi1/0/2 |
+| 6 | HQ-CORE-SW2 | Gi1/0/2 | HQ-ACC-SW2 | Gi1/0/2 |
+
+Why two cables between the cores, and four down to the access layer? The two core cables will become one EtherChannel. The four uplinks give every access switch a path to both cores, so no single device failure cuts anyone off.
+
+### Edge and DMZ
+
+| # | From | Port | To | Port |
+|---:|---|---:|---|---:|
+| 7 | HQ-CORE-SW1 | Gi1/0/10 | HQ-FW1 | Gi1/2 (inside) |
+| 8 | HQ-FW1 | Gi1/1 (outside) | ISP-RTR | Gi0/0 |
+| 9 | HQ-FW1 | Gi1/3 (DMZ) | DMZ-SW1 | Fa0/1 |
+| 10 | WEB-SRV1 | Fa0 | DMZ-SW1 | Fa0/2 |
+
+Why three separate firewall ports? Each port is a different security zone (inside, outside, DMZ), and the firewall’s rules apply between them.
+
+### Branch
+
+{

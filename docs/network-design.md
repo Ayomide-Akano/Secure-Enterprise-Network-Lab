@@ -126,6 +126,50 @@ These are the authoritative SVI and routed-link addresses for the HQ site.
 | 10 | BR-RTR1 | BR-SW1 | Copper straight | Branch LAN |
 | 11 | Endpoints | Their switches | Copper straight | PCs on access, WEB-SRV1 on DMZ-SW1, AAA-SRV1 on HQ-CORE-SW2, BR-PC1 on BR-SW1 |
 
+## Cisco Device Names and Roles
+
+- HQ-CORE-SW1: primary distribution/core switch for HQ LAN
+- HQ-CORE-SW2: redundant core switch for HA and resilience
+- HQ-ACC-SW1: access switch for HQ user VLANs
+- HQ-ACC-SW2: backup access switch for high availability
+- HQ-FW1: Cisco firewall or security appliance for segmentation and Internet edge
+- DMZ-SW1: DMZ switch for public services
+- ISP-RTR: upstream provider router
+- BR-RTR1: branch WAN router and default gateway
+- BR-SW1: branch access distribution switch
+- WEB-SRV1: DMZ web server
+- AAA-SRV1: authentication, authorization, and accounting server
+- BR-PC1: example branch user workstation
+
+## Design Rationale
+
+### 1. Redundant Core Switches (Availability)
+
+The HQ network uses two core switches (HQ-CORE-SW1 and HQ-CORE-SW2), and every access switch has an uplink to both. If one core switch fails or goes offline, traffic continues through the other, supporting the Availability pillar of the CIA triad. Spanning Tree Protocol (STP) prevents loops across the redundant paths, and HSRP provides a default gateway that survives a core failure.
+
+### 2. Web Server in the DMZ (Containment / Assume Breach)
+
+The web server must accept connections from the public Internet, which makes it the most exposed system in the network and the most likely to be attacked. Placing it on the internal network would mean a single compromise gives an attacker a foothold next to sensitive systems. Instead, WEB-SRV1 sits in an isolated DMZ behind the firewall. Firewall policy allows Internet-to-DMZ traffic only on required ports (HTTP/HTTPS), blocks DMZ-to-internal traffic, and blocks Internet-to-internal traffic. If the web server is compromised, the attack is contained within the DMZ and the internal network stays protected.
+
+### 3. Guest and Finance Segmentation (Least Privilege / Limiting Lateral Movement)
+
+Guest users are untrusted devices. The Guest VLAN (40) is segmented from the Finance VLAN (20) so that a compromised guest device cannot move laterally into sensitive systems. VLANs separate the networks, and ACLs on the Layer 3 core enforce the boundary: Guest traffic is permitted to reach the Internet only and is denied access to all internal VLANs. This follows the principle of least privilege and limits the blast radius of any guest-side compromise.
+
+## Security Controls
+
+- ACLs on interfaces
+- Zone-based firewall policies
+- VLAN segmentation
+- SSH and secure management access
+- Logging to central monitoring
+
+## Future Considerations
+
+- SD-WAN or dual WAN connectivity
+- 802.1X for endpoint access
+- IDS/IPS deployment
+- Multi-factor authentication for admins
+
 ## Port Record
 
 ### HQ core and access layer
@@ -154,4 +198,20 @@ Why three separate firewall ports? Each port is a different security zone (insid
 
 ### Branch
 
-{
+| # | From | Port | To | Port |
+|---:|---|---:|---|---:|
+| 11 | ISP-RTR | Gi0/1 | BR-RTR1 | Gi0/0 |
+| 12 | BR-RTR1 | Gi0/1 | BR-SW1 | Gi1/0/1 |
+| 13 | BR-PC1 | Fa0 | BR-SW1 | Gi1/0/2 |
+
+### Endpoints at HQ
+
+| # | From | Port | To | Port |
+|---:|---|---:|---|---:|
+| 14 | PC-STAFF1 | Fa0 | HQ-ACC-SW1 | Fa0/1 |
+| 15 | PC-FIN1 | Fa0 | HQ-ACC-SW1 | Fa0/2 |
+| 16 | PC-ADMIN1 | Fa0 | HQ-ACC-SW2 | Fa0/1 |
+| 17 | PC-GUEST1 | Fa0 | HQ-ACC-SW2 | Fa0/2 |
+| 18 | AAA-SRV1 | Fa0 | HQ-CORE-SW2 | Gi1/0/10 |
+
+Use this port record as the single source of truth: every configuration and diagram in the project should reference these entries.
